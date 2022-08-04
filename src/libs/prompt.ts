@@ -9,10 +9,11 @@ export function logStep(message: string) {
   console.log(`${green('✔')} ${message}`)
 }
 
-export async function promptForName() {
+export async function promptForName(): Promise<string> {
   const { name } = await prompts({
     message: reset('App name:'),
     name: 'name',
+    onState: onPromptStateChange,
     type: 'text',
     validate: (value) =>
       isValidNpmPackageName(value) ||
@@ -22,14 +23,28 @@ export async function promptForName() {
   return name
 }
 
-export async function promptForDirectory(name: string) {
+export async function promptForDirectory(name: string): Promise<string> {
   const { newDirectory } = await prompts({
     active: `new '${name}' directory`,
     inactive: 'current directory',
     message: reset('App directory:'),
     name: 'newDirectory',
+    onState: onPromptStateChange,
     type: 'toggle',
   })
 
   return path.resolve(newDirectory ? name : '.')
+}
+
+function onPromptStateChange(state: PromptState) {
+  if (state.aborted) {
+    process.nextTick(() => {
+      process.exit(1)
+    })
+  }
+}
+
+interface PromptState {
+  aborted: boolean
+  value: string
 }
