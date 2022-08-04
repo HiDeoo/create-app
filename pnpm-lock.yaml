@@ -1,12 +1,16 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@hideoo/prettier-config': 0.1.0
   '@hideoo/tsconfig': 0.1.0
+  prettier: 2.7.1
   typescript: 4.7.4
   unbuild: 0.7.6
 
 devDependencies:
+  '@hideoo/prettier-config': 0.1.0
   '@hideoo/tsconfig': 0.1.0
+  prettier: 2.7.1
   typescript: 4.7.4
   unbuild: 0.7.6
 
@@ -226,6 +230,10 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@hideoo/prettier-config/0.1.0:
+    resolution: {integrity: sha512-Fb+OiuPp1MPYIYhxW4yUYhGos43tVz59lI5aZbSONUVxrKFTB9fYzOeA1lrSp9lQbPs5KQyHWFE9AciwOm2nQQ==}
+    dev: true
 
   /@hideoo/tsconfig/0.1.0:
     resolution: {integrity: sha512-qZbYYblBBTT9v44V3oxcATCom93UYb7rOkH13yxPUvjrLDdc3P+ZugCCOvWM4fwl+oX+Ig2bSoKgG/xwPU2/CQ==}
@@ -1073,6 +1081,12 @@ packages:
       jsonc-parser: 3.1.0
       mlly: 0.5.7
       pathe: 0.3.3
+    dev: true
+
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /pretty-bytes/6.0.0:
