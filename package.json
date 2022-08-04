@@ -6,6 +6,7 @@
     "dev": "unbuild --stub",
     "build": "unbuild",
     "lint": "prettier -c . && eslint . --max-warnings=0 && tsc --noEmit",
+    "prepare": "husky install",
     "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
@@ -13,10 +14,16 @@
     "@hideoo/prettier-config": "0.1.1",
     "@hideoo/tsconfig": "0.1.0",
     "eslint": "8.21.0",
+    "husky": "8.0.1",
+    "lint-staged": "13.0.3",
     "prettier": "2.7.1",
     "typescript": "4.7.4",
     "unbuild": "0.7.6"
   },
   "packageManager": "pnpm@7.8.0",
-  "prettier": "@hideoo/prettier-config"
+  "prettier": "@hideoo/prettier-config",
+  "lint-staged": {
+    "**/*": "prettier -w -u --cache",
+    "**/*.ts": "eslint --max-warnings=0"
+  }
 }
