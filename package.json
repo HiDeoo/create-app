@@ -21,6 +21,9 @@
     "unbuild": "0.7.6"
   },
   "packageManager": "pnpm@7.8.0",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "prettier": "@hideoo/prettier-config",
   "lint-staged": {
     "**/*": "prettier -w -u --cache",
