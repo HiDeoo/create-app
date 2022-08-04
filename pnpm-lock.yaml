@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@hideoo/eslint-config': 0.4.0
-  '@hideoo/prettier-config': 0.1.0
+  '@hideoo/prettier-config': 0.1.1
   '@hideoo/tsconfig': 0.1.0
   eslint: 8.21.0
   prettier: 2.7.1
@@ -11,7 +11,7 @@ specifiers:
 
 devDependencies:
   '@hideoo/eslint-config': 0.4.0_qugx7qdu5zevzvxaiqyxfiwquq
-  '@hideoo/prettier-config': 0.1.0
+  '@hideoo/prettier-config': 0.1.1
   '@hideoo/tsconfig': 0.1.0
   eslint: 8.21.0
   prettier: 2.7.1
@@ -330,8 +330,8 @@ packages:
       - typescript
     dev: true
 
-  /@hideoo/prettier-config/0.1.0:
-    resolution: {integrity: sha512-Fb+OiuPp1MPYIYhxW4yUYhGos43tVz59lI5aZbSONUVxrKFTB9fYzOeA1lrSp9lQbPs5KQyHWFE9AciwOm2nQQ==}
+  /@hideoo/prettier-config/0.1.1:
+    resolution: {integrity: sha512-ACVLh1t7HVfgqWv2U/GfMx+hGNHwvJHhOOukV0kQ4dqhRy1pzxXR3VggBgEHGf0VE4dW63XPV5CjNSSqyx//yw==}
     dev: true
 
   /@hideoo/tsconfig/0.1.0:
