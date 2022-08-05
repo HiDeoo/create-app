@@ -1,5 +1,6 @@
 {
   "extends": "@hideoo",
+  "ignorePatterns": ["fixtures"],
   "overrides": [
     {
       "files": ["prompt.*"],

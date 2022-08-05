@@ -1,4 +1,3 @@
-import { constants } from 'node:fs'
 import fs from 'node:fs/promises'
 
 import validateNpmPackageName from 'validate-npm-package-name'
@@ -9,7 +8,7 @@ export function isValidNpmPackageName(name: string) {
 
 export async function cwdContainsPkg() {
   try {
-    await fs.access('package.json', constants.R_OK | constants.W_OK)
+    await fs.stat('package.json')
 
     return true
   } catch {
