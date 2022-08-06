@@ -6,12 +6,12 @@ import { logStep, promptForDirectory, promptForName } from './libs/prompt'
 
 async function run() {
   try {
-    const pkgFound = await cwdContainsPkg()
+    const pkgName = await cwdContainsPkg()
 
-    if (pkgFound) {
-      logStep('Found `package.json` in the current directory, the existing app will be updated.')
+    if (pkgName) {
+      logStep(`Found 'package.json' in the current directory, the app '${pkgName}' will be updated.`)
 
-      await updateApp()
+      await updateApp(pkgName)
     } else {
       const name = await promptForName()
       const path = await promptForDirectory(name)

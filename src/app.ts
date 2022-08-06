@@ -1,20 +1,22 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { compileTemplate, getTemplatePaths } from './libs/template'
+import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
+import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 
-export function updateApp() {
-  return bootstrapApp()
+export function updateApp(appName: string, appPath = process.cwd()) {
+  return bootstrapApp(appName, appPath)
 }
 
-export async function createApp(_appName: string, appPath: string) {
+export async function createApp(appName: string, appPath: string) {
   await fs.mkdir(appPath, { recursive: true })
 
-  return bootstrapApp(appPath)
+  return bootstrapApp(appName, appPath)
 }
 
-async function bootstrapApp(appPath = process.cwd()) {
+async function bootstrapApp(appName: string, appPath: string) {
   await copyTemplates(appPath)
+  await copyPkg(appName, appPath)
 }
 
 async function copyTemplates(appPath: string) {
@@ -24,9 +26,39 @@ async function copyTemplates(appPath: string) {
 
   return Promise.all(
     templatePaths.map(async ({ destination, source }) => {
-      const content = await compileTemplate(source, templateVariables)
+      const templateContent = await getTemplateContent(source)
+      const compiledTemplate = await compileTemplate(templateContent, templateVariables)
 
-      return fs.writeFile(path.join(appPath, destination), content, { encoding: 'utf8' })
+      return writeAppFile(appPath, destination, compiledTemplate)
     })
   )
+}
+
+async function copyPkg(appName: string, appPath: string) {
+  const fileName = 'package.json'
+
+  const template = await getTemplateContent(getTemplatePath(fileName))
+  const existing = (await readAppFile(appPath, fileName)) ?? '{}'
+
+  const templatePkg = parsePkg(template)
+  const existingPkg = parsePkg(existing)
+
+  let pkg = mergePkgs(existingPkg, templatePkg)
+  pkg = await pinPkgDependenciesToLatest(pkg)
+  pkg = await setPkgManagerToLatest(pkg)
+
+  const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2), { APP_NAME: appName })
+  return writeAppFile(appPath, fileName, compiledPkg)
+}
+
+async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
+  try {
+    return await fs.readFile(path.join(appPath, filePath), { encoding: 'utf8' })
+  } catch {
+    return
+  }
+}
+
+function writeAppFile(appPath: string, filePath: string, data: string) {
+  return fs.writeFile(path.join(appPath, filePath), data)
 }

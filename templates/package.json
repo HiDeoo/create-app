@@ -1,0 +1,28 @@
+{
+  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
+  "bugs": "https://github.com/HiDeoo/{{APP_NAME}}/issues",
+  "description": "",
+  "devDependencies": {
+    "// TODO": "// TODO"
+  },
+  "engines": {
+    "node": "// TODO"
+  },
+  "homepage": "https://github.com/HiDeoo/{{APP_NAME}}",
+  "keywords": [],
+  "license": "MIT",
+  "main": "// TODO",
+  "name": "{{APP_NAME}}",
+  "packageManager": "…",
+  "private": true,
+  "repository": {
+    "url": "https://github.com/HiDeoo/{{APP_NAME}}.git",
+    "type": "git"
+  },
+  "scripts": {
+    "// TODO": "// TODO"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.0.1"
+}

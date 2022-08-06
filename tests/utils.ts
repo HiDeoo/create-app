@@ -5,7 +5,10 @@ import path from 'node:path'
 
 import { diff, type DiffOptions } from 'jest-diff'
 import glob from 'tiny-glob'
+import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
+
+import { UNPKG_URL } from '../src/libs/unpkg'
 
 const diffColorTransformer = (input: string) => input
 
@@ -23,9 +26,21 @@ const diffOptions: DiffOptions = {
 export function setupTest(testName: string) {
   const testDir = path.join(os.tmpdir(), crypto.randomUUID(), testName)
 
+  let mockAgent: MockAgent | undefined
+
   async function beforeTest() {
     vi.useFakeTimers()
     vi.setSystemTime(new Date(2020, 1, 1, 12, 0, 0))
+
+    mockAgent = new MockAgent()
+    setGlobalDispatcher(mockAgent)
+
+    const mockPool = mockAgent.get(UNPKG_URL)
+
+    mockPool
+      .intercept({ path: () => true })
+      .reply(200, () => ({ version: 'la.te.st' }))
+      .persist()
 
     await fs.mkdir(testDir, { recursive: true })
 
@@ -36,8 +51,12 @@ export function setupTest(testName: string) {
     }
   }
 
-  function afterTest() {
+  async function afterTest() {
     vi.useRealTimers()
+
+    if (mockAgent) {
+      await mockAgent.close()
+    }
 
     return fs.rm(testDir, { recursive: true })
   }
@@ -57,11 +76,19 @@ export async function getExpectedPaths() {
   return expectedPaths.map((expectedPath) => expectedPath.replace(path.join(__dirname, '../templates'), ''))
 }
 
-export async function getTestFileAndTemplateContent(testDir: string, filePath: string) {
-  const file = await fs.readFile(path.join(testDir, filePath), 'utf8')
-  const template = await fs.readFile(path.join('templates', filePath), 'utf8')
+export async function getTestContent(testDir: string, appName: string, filePath: string) {
+  const file = await fs.readFile(path.join(testDir, filePath), { encoding: 'utf8' })
+  const template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
 
-  return { template, file }
+  let fixture: string | undefined
+
+  try {
+    fixture = await fs.readFile(path.join('fixtures', appName, filePath), { encoding: 'utf8' })
+  } catch {
+    //
+  }
+
+  return { file, fixture, template }
 }
 
 export function diffStrings(left: string, right: string) {
