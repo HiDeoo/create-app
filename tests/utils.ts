@@ -8,6 +8,7 @@ import glob from 'tiny-glob'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
 
+import * as prompt from '../src/libs/prompt'
 import { UNPKG_URL } from '../src/libs/unpkg'
 
 const diffColorTransformer = (input: string) => input
@@ -27,6 +28,8 @@ export function setupTest(testName: string) {
   const testDir = path.join(os.tmpdir(), crypto.randomUUID(), testName)
 
   let mockAgent: MockAgent | undefined
+
+  const confirmationPromptSpy = vi.spyOn(prompt, 'promptForConfirmation').mockResolvedValue()
 
   async function beforeTest() {
     vi.useFakeTimers()
@@ -52,6 +55,8 @@ export function setupTest(testName: string) {
   }
 
   async function afterTest() {
+    confirmationPromptSpy.mockRestore()
+
     vi.useRealTimers()
 
     if (mockAgent) {

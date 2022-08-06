@@ -4,6 +4,7 @@ import { green, reset } from 'kolorist'
 import ora from 'ora'
 import prompts from 'prompts'
 
+import { UserAbortError } from './error'
 import { isValidNpmPackageName } from './npm'
 
 const spinner = ora()
@@ -21,8 +22,18 @@ export function logStepWithProgress(message: string) {
 }
 
 export function logError(error: unknown) {
+  const aborted = error instanceof UserAbortError
+
+  if (aborted) {
+    spinner.fail('Aborted').stop()
+  }
+
   if (spinner.isSpinning) {
     spinner.fail()
+  }
+
+  if (aborted) {
+    return
   }
 
   const isError = error instanceof Error
@@ -58,6 +69,21 @@ export async function promptForDirectory(name: string): Promise<string> {
   })
 
   return path.resolve(newDirectory ? name : '.')
+}
+
+export async function promptForConfirmation(message: string): Promise<void> {
+  const { abort } = await prompts({
+    active: 'no',
+    inactive: 'yes',
+    message: reset(message),
+    name: 'abort',
+    onState: onPromptStateChange,
+    type: 'toggle',
+  })
+
+  if (abort) {
+    throw new UserAbortError()
+  }
 }
 
 function onPromptStateChange(state: PromptState) {

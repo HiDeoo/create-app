@@ -17,7 +17,7 @@ async function run() {
       await createApp(name, path)
     }
 
-    logStepWithProgress('// TODO done').succeed()
+    logStepWithProgress('Done').succeed()
   } catch (error) {
     logError(error)
 

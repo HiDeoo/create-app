@@ -2,14 +2,18 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
-import { logStepWithProgress } from './libs/prompt'
+import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 
-export function updateApp(appName: string, appPath = process.cwd()) {
+export async function updateApp(appName: string, appPath = process.cwd()) {
+  await promptForConfirmation('Update the application?')
+
   return bootstrapApp(appName, appPath)
 }
 
 export async function createApp(appName: string, appPath: string) {
+  await promptForConfirmation('Create the application?')
+
   await fs.mkdir(appPath, { recursive: true })
 
   return bootstrapApp(appName, appPath)
