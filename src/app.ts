@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
+import { logStepWithProgress } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 
 export function updateApp(appName: string, appPath = process.cwd()) {
@@ -20,6 +21,8 @@ async function bootstrapApp(appName: string, appPath: string) {
 }
 
 async function copyTemplates(appPath: string) {
+  logStepWithProgress('Copying templates…')
+
   const templatePaths = await getTemplatePaths()
 
   const templateVariables = { YEAR: new Date().getFullYear() }
@@ -35,6 +38,8 @@ async function copyTemplates(appPath: string) {
 }
 
 async function copyPkg(appName: string, appPath: string) {
+  logStepWithProgress('Brewing package.json…')
+
   const fileName = 'package.json'
 
   const template = await getTemplateContent(getTemplatePath(fileName))
