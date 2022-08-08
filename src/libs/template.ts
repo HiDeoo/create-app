@@ -14,7 +14,7 @@ const templateVariables = ['APP_NAME', 'NODE_VERSION', 'YEAR'] as const
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
 
-  const allTemplatePaths = await glob(path.join(templatePath, '**/*'), { absolute: true, filesOnly: true })
+  const allTemplatePaths = await glob(path.join(templatePath, '**/*'), { absolute: true, dot: true, filesOnly: true })
 
   const templates: Template[] = []
 

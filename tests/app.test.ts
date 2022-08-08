@@ -205,6 +205,12 @@ describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
 
     expect(file).toBe(template)
   })
+
+  test('should add the .gitignore file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, '.gitignore')
+
+    expect(file).toBe(template)
+  })
 })
 
 function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
