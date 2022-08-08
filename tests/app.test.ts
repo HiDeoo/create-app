@@ -109,6 +109,8 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
 
     expect(filePkg.packageManager).toBe(`${PACKAGE_MANAGER}@la.te.st`)
 
+    expect(filePkg.prettier).toBe(templatePkg.prettier)
+
     expect(filePkg.private).toBe(templatePkg.private)
 
     assert(isRepositoryObject(templatePkg.repository) && isRepositoryObject(filePkg.repository))
@@ -177,6 +179,12 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     if (fixtureEsLintConfig.extends) {
       expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining([fixtureEsLintConfig.extends]))
     }
+  })
+
+  test('should add the .prettierignore file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, '.prettierignore')
+
+    expect(file).toBe(template)
   })
 })
 

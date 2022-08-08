@@ -4,8 +4,10 @@
   "description": "",
   "devDependencies": {
     "@hideoo/eslint-config": "…",
+    "@hideoo/prettier-config": "…",
     "@hideoo/tsconfig": "…",
     "eslint": "…",
+    "prettier": "…",
     "typescript": "…"
   },
   "engines": {
@@ -17,6 +19,7 @@
   "main": "// TODO",
   "name": "{{APP_NAME}}",
   "packageManager": "…",
+  "prettier": "@hideoo/prettier-config",
   "private": true,
   "repository": {
     "url": "https://github.com/HiDeoo/{{APP_NAME}}.git",
