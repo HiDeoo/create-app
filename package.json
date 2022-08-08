@@ -1,6 +1,7 @@
 {
   "name": "@hideoo/create-app",
   "author": "HiDeoo",
+  "version": "0.0.1",
   "bin": "./cli.mjs",
   "type": "module",
   "scripts": {
