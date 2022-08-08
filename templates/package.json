@@ -3,7 +3,7 @@
   "bugs": "https://github.com/HiDeoo/{{APP_NAME}}/issues",
   "description": "",
   "devDependencies": {
-    "// TODO": "// TODO"
+    "typescript": "…"
   },
   "engines": {
     "node": ">={{NODE_VERSION}}"

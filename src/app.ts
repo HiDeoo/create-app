@@ -2,7 +2,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
-import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
+import { installDependencies } from './libs/pm'
+import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 
 export async function updateApp(appName: string, appPath = process.cwd()) {
@@ -22,6 +23,8 @@ export async function createApp(appName: string, appPath: string) {
 async function bootstrapApp(appName: string, appPath: string) {
   await copyTemplates(appName, appPath)
   await copyPkg(appName, appPath)
+
+  return install(appPath)
 }
 
 async function copyTemplates(appName: string, appPath: string) {
@@ -56,6 +59,12 @@ async function copyPkg(appName: string, appPath: string) {
 
   const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
   return writeAppFile(appPath, fileName, compiledPkg)
+}
+
+function install(appPath: string) {
+  logStep('Preparing dependencies…\n')
+
+  return installDependencies(appPath)
 }
 
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {

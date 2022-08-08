@@ -16,6 +16,7 @@ export function setupTest(testName: string) {
 
   let mockAgent: MockAgent | undefined
 
+  const logStepSpy = vi.spyOn(prompt, 'logStep').mockReturnValue()
   const confirmationPromptSpy = vi.spyOn(prompt, 'promptForConfirmation').mockResolvedValue()
   const logStepWithProgressSpy = vi.spyOn(prompt, 'logStepWithProgress').mockResolvedValue({} as Ora)
 
@@ -43,6 +44,7 @@ export function setupTest(testName: string) {
   }
 
   async function afterTest() {
+    logStepSpy.mockRestore()
     confirmationPromptSpy.mockRestore()
     logStepWithProgressSpy.mockRestore()
 

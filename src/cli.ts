@@ -1,6 +1,6 @@
 import { createApp, updateApp } from './app'
 import { cwdContainsPkg } from './libs/npm'
-import { logError, logStep, logStepWithProgress, promptForDirectory, promptForName } from './libs/prompt'
+import { logError, logStep, promptForDirectory, promptForName } from './libs/prompt'
 
 async function run() {
   try {
@@ -17,7 +17,7 @@ async function run() {
       await createApp(name, path)
     }
 
-    logStepWithProgress('Done').succeed()
+    logStep('Done', true)
   } catch (error) {
     logError(error)
 

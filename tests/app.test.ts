@@ -1,5 +1,7 @@
+import { spawn } from 'node:child_process'
+
 import { type PackageJson } from 'type-fest'
-import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest'
+import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { createApp, updateApp } from '../src/app'
 import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
@@ -25,6 +27,21 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName) => updateApp(appName, testDir),
   },
 ]
+
+vi.mock('node:child_process', async () => {
+  const mod = await vi.importActual<typeof import('node:child_process')>('node:child_process')
+
+  return {
+    ...mod,
+    spawn: vi.fn().mockReturnValue({
+      on: vi.fn().mockImplementation((event, listener) => {
+        if (event === 'close') {
+          listener(0)
+        }
+      }),
+    }),
+  }
+})
 
 describe.each(testScenarios)('$description', ({ appName, setup }) => {
   const { afterTest, beforeTest, testDir } = setupTest(appName)
@@ -62,29 +79,47 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     const templatePkg = parsePkg(template)
 
     expect(filePkg.author).toBe(templatePkg.author)
+
     assert(isString(templatePkg.bugs) && isString(filePkg.bugs))
     expectCompiledTemplate(templatePkg.bugs, filePkg.bugs, templateVariables)
+
     expect(filePkg.description).toBe(templatePkg.description)
+
     // TODO(HiDeoo) dependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.dependencies)
+
     // TODO(HiDeoo) devDependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.devDependencies)
+
     assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
     expectCompiledTemplate(templatePkg.engines?.['node'], filePkg.engines?.['node'], templateVariables)
+
     assert(isString(templatePkg.homepage) && isString(filePkg.homepage))
     expectCompiledTemplate(templatePkg.homepage, filePkg.homepage, templateVariables)
+
     expect(filePkg.keywords).toEqual(templatePkg.keywords)
+
     expect(filePkg.license).toBe(templatePkg.license)
+
     // TODO(HiDeoo) main
+
     expect(filePkg.name).toBe(appName)
+
     expect(filePkg.packageManager).toBe(`${PACKAGE_MANAGER}@la.te.st`)
+
     expect(filePkg.private).toBe(templatePkg.private)
+
     assert(isRepositoryObject(templatePkg.repository) && isRepositoryObject(filePkg.repository))
     expectCompiledTemplate(templatePkg.repository.url, filePkg.repository.url, templateVariables)
+
     expect(filePkg.repository.type).toBe(templatePkg.repository.type)
+
     // TODO(HiDeoo) scripts
+
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
+
     expect(filePkg.type).toBe(fixturePkg.type ? fixturePkg.type : fixturePkg.name ? undefined : templatePkg.type)
+
     expect(filePkg.version).toBe(templatePkg.version)
   })
 
@@ -92,6 +127,16 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     const { file, template } = await getTestContent(testDir, appName, 'README.md')
 
     expectCompiledTemplate(template, file, templateVariables)
+  })
+
+  test('should install dependencies', async () => {
+    const spawnMock = vi.mocked(spawn)
+
+    expect(spawnMock).toHaveBeenCalledOnce()
+    expect(spawnMock.mock.lastCall?.[0]).toBe(PACKAGE_MANAGER)
+    expect(spawnMock.mock.lastCall?.[1]).toEqual(['install', '-C', testDir])
+
+    spawnMock.mockClear()
   })
 })
 
