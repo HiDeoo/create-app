@@ -7,7 +7,7 @@ import glob from 'tiny-glob'
 import { NODE_VERSION } from '../config'
 
 // A set of templates which will not be automatically processed and requires special handling.
-const specialTemplates = new Set(['package.json', 'tsconfig.json'])
+const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json'])
 
 const templateVariables = ['APP_NAME', 'NODE_VERSION', 'YEAR'] as const
 

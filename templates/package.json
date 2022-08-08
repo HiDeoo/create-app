@@ -3,7 +3,9 @@
   "bugs": "https://github.com/HiDeoo/{{APP_NAME}}/issues",
   "description": "",
   "devDependencies": {
+    "@hideoo/eslint-config": "…",
     "@hideoo/tsconfig": "…",
+    "eslint": "…",
     "typescript": "…"
   },
   "engines": {

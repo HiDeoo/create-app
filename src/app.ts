@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
 import { installDependencies } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
@@ -25,6 +26,7 @@ async function bootstrapApp(appName: string, appPath: string) {
   await copyTemplates(appName, appPath)
   await copyPkg(appName, appPath)
   await copyTsConfig(appPath)
+  await copyEsLintConfig(appPath)
 
   return install(appPath)
 }
@@ -77,7 +79,23 @@ async function copyTsConfig(appPath: string) {
 
   const tsConfig = mergeTsConfigs(existingTsConfig, templateTsConfig)
 
-  return writeAppFile(appPath, fileName, JSON.stringify(tsConfig, null, 2))
+  return writeAppJsonFile(appPath, fileName, tsConfig)
+}
+
+async function copyEsLintConfig(appPath: string) {
+  logStepWithProgress('Setting up ESLint…')
+
+  const fileName = '.eslintrc.json'
+
+  const template = await getTemplateContent(getTemplatePath(fileName))
+  const existing = (await readAppFile(appPath, fileName)) ?? '{}'
+
+  const templateEsLintConfig = parseEsLintConfig(template)
+  const existingEsLintConfig = parseEsLintConfig(existing)
+
+  const esLintConfig = mergeEsLintConfigs(existingEsLintConfig, templateEsLintConfig)
+
+  return writeAppJsonFile(appPath, fileName, esLintConfig)
 }
 
 function install(appPath: string) {
@@ -96,4 +114,8 @@ async function readAppFile(appPath: string, filePath: string): Promise<string | 
 
 function writeAppFile(appPath: string, filePath: string, data: string) {
   return fs.writeFile(path.join(appPath, filePath), data)
+}
+
+function writeAppJsonFile(appPath: string, filePath: string, data: unknown) {
+  return fs.writeFile(path.join(appPath, filePath), JSON.stringify(data, null, 2))
 }

@@ -5,6 +5,7 @@ import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { createApp, updateApp } from '../src/app'
 import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
+import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
 import { parseTsConfig } from '../src/libs/typescript'
@@ -162,6 +163,20 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
 
     expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
     expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
+  })
+
+  test('should add or update the .eslintrc.json file', async () => {
+    const { file, fixture } = await getTestContent(testDir, appName, '.eslintrc.json')
+
+    const fileEsLintConfig = parseEsLintConfig(file)
+    const fixtureEsLintConfig = parseEsLintConfig(fixture ?? '{}')
+
+    expect(Object.keys(fileEsLintConfig).length).toBe(1)
+    expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
+
+    if (fixtureEsLintConfig.extends) {
+      expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining([fixtureEsLintConfig.extends]))
+    }
   })
 })
 
