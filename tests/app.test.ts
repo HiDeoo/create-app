@@ -85,11 +85,11 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
 
     expect(filePkg.description).toBe(templatePkg.description)
 
-    // TODO(HiDeoo) dependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.dependencies)
+    expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies)
 
-    // TODO(HiDeoo) devDependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.devDependencies)
+    expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
 
     assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
     expectCompiledTemplate(templatePkg.engines?.['node'], filePkg.engines?.['node'], templateVariables)
@@ -140,14 +140,22 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
   })
 })
 
-function expectPinnedDependenciesToLatest(dependencies?: PackageJson.Dependency) {
-  if (!dependencies) {
+function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
+  if (!deps) {
     return
   }
 
-  for (const version of Object.values(dependencies)) {
+  for (const version of Object.values(deps)) {
     expect(version).toBe('la.te.st')
   }
+}
+
+function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?: PackageJson.Dependency) {
+  if (!oldDeps || !newDeps) {
+    return
+  }
+
+  expect(Object.keys(newDeps)).toEqual(Object.keys(oldDeps))
 }
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {
