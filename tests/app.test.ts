@@ -1,4 +1,3 @@
-import { stripIndents } from 'common-tags'
 import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest'
 
@@ -6,7 +5,7 @@ import { createApp, updateApp } from '../src/app'
 import { parsePkg } from '../src/libs/npm'
 import { PACKAGE_MANAGER } from '../src/libs/pm'
 
-import { diffStrings, getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
+import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 
 const testScenarios: TestScenario[] = [
   {
@@ -29,8 +28,12 @@ const testScenarios: TestScenario[] = [
 describe.each(testScenarios)('$description', ({ appName, setup }) => {
   const { afterTest, beforeTest, testDir } = setupTest(appName)
 
+  let templateVariables = {}
+
   beforeAll(async () => {
     await beforeTest()
+
+    templateVariables = { APP_NAME: appName, YEAR: new Date().getFullYear() }
 
     return setup(testDir, appName)
   })
@@ -47,12 +50,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
   test('should add the license file', async () => {
     const { file, template } = await getTestContent(testDir, appName, 'LICENSE')
 
-    expect(diffStrings(template, file)).toMatch(
-      stripIndents`
-        - Copyright (c) {{YEAR}}-present, HiDeoo
-        + Copyright (c) 2020-present, HiDeoo
-      `
-    )
+    expectCompiledTemplate(template, file, templateVariables)
   })
 
   test('should add or update the package.json file', async () => {
@@ -65,12 +63,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     expect(filePkg.author).toBe(templatePkg.author)
     assert(isString(templatePkg.bugs))
     assert(isString(filePkg.bugs))
-    expect(diffStrings(templatePkg.bugs, filePkg.bugs)).toMatch(
-      stripIndents`
-        - ${templatePkg.bugs}
-        + https://github.com/HiDeoo/${appName}/issues
-      `
-    )
+    expectCompiledTemplate(templatePkg.bugs, filePkg.bugs, templateVariables)
     expect(filePkg.description).toBe(templatePkg.description)
     // TODO(HiDeoo) dependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.dependencies)
@@ -79,12 +72,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     // TODO(HiDeoo) engine
     assert(isString(templatePkg.homepage))
     assert(isString(filePkg.homepage))
-    expect(diffStrings(templatePkg.homepage, filePkg.homepage)).toMatch(
-      stripIndents`
-        - ${templatePkg.homepage}
-        + https://github.com/HiDeoo/${appName}
-      `
-    )
+    expectCompiledTemplate(templatePkg.homepage, filePkg.homepage, templateVariables)
     expect(filePkg.keywords).toEqual(templatePkg.keywords)
     expect(filePkg.license).toBe(templatePkg.license)
     // TODO(HiDeoo) main
@@ -93,17 +81,18 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     expect(filePkg.private).toBe(templatePkg.private)
     assert(isRepositoryObject(templatePkg.repository))
     assert(isRepositoryObject(filePkg.repository))
-    expect(diffStrings(templatePkg.repository.url, filePkg.repository.url)).toMatch(
-      stripIndents`
-        - ${templatePkg.repository.url}
-        + https://github.com/HiDeoo/${appName}.git
-      `
-    )
+    expectCompiledTemplate(templatePkg.repository.url, filePkg.repository.url, templateVariables)
     expect(filePkg.repository.type).toBe(templatePkg.repository.type)
     // TODO(HiDeoo) scripts
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
     expect(filePkg.type).toBe(fixturePkg.type ? fixturePkg.type : fixturePkg.name ? undefined : templatePkg.type)
     expect(filePkg.version).toBe(templatePkg.version)
+  })
+
+  test('should add the readme file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'README.md')
+
+    expectCompiledTemplate(template, file, templateVariables)
   })
 })
 
@@ -115,6 +104,18 @@ function expectPinnedDependenciesToLatest(dependencies?: PackageJson.Dependency)
   for (const version of Object.values(dependencies)) {
     expect(version).toBe('la.te.st')
   }
+}
+
+function expectCompiledTemplate(template: string, content: string, data: Record<string, string | number>) {
+  expect(
+    template.replaceAll(/{{(\w+)}}/g, (_match, variable) => {
+      if (!data[variable]) {
+        throw new Error(`Missing variable '${variable}' to compile template.`)
+      }
+
+      return data[variable] ?? variable
+    })
+  ).toBe(content)
 }
 
 function isString(value: unknown): value is string {

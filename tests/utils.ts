@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { diff, type DiffOptions } from 'jest-diff'
+import { type Ora } from 'ora'
 import glob from 'tiny-glob'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
@@ -11,25 +11,13 @@ import { vi } from 'vitest'
 import * as prompt from '../src/libs/prompt'
 import { UNPKG_URL } from '../src/libs/unpkg'
 
-const diffColorTransformer = (input: string) => input
-
-const diffOptions: DiffOptions = {
-  aColor: diffColorTransformer,
-  bColor: diffColorTransformer,
-  changeColor: diffColorTransformer,
-  commonColor: diffColorTransformer,
-  contextLines: 0,
-  expand: false,
-  omitAnnotationLines: true,
-  patchColor: diffColorTransformer,
-}
-
 export function setupTest(testName: string) {
   const testDir = path.join(os.tmpdir(), crypto.randomUUID(), testName)
 
   let mockAgent: MockAgent | undefined
 
   const confirmationPromptSpy = vi.spyOn(prompt, 'promptForConfirmation').mockResolvedValue()
+  const logStepWithProgressSpy = vi.spyOn(prompt, 'logStepWithProgress').mockResolvedValue({} as Ora)
 
   async function beforeTest() {
     vi.useFakeTimers()
@@ -56,6 +44,7 @@ export function setupTest(testName: string) {
 
   async function afterTest() {
     confirmationPromptSpy.mockRestore()
+    logStepWithProgressSpy.mockRestore()
 
     vi.useRealTimers()
 
@@ -94,8 +83,4 @@ export async function getTestContent(testDir: string, appName: string, filePath:
   }
 
   return { file, fixture, template }
-}
-
-export function diffStrings(left: string, right: string) {
-  return diff(left, right, diffOptions)?.replaceAll(/^@@.*\n/gm, '')
 }

@@ -20,16 +20,16 @@ export async function createApp(appName: string, appPath: string) {
 }
 
 async function bootstrapApp(appName: string, appPath: string) {
-  await copyTemplates(appPath)
+  await copyTemplates(appName, appPath)
   await copyPkg(appName, appPath)
 }
 
-async function copyTemplates(appPath: string) {
+async function copyTemplates(appName: string, appPath: string) {
   logStepWithProgress('Copying templates…')
 
   const templatePaths = await getTemplatePaths()
 
-  const templateVariables = { YEAR: new Date().getFullYear() }
+  const templateVariables = { APP_NAME: appName, YEAR: new Date().getFullYear() }
 
   return Promise.all(
     templatePaths.map(async ({ destination, source }) => {
