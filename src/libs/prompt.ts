@@ -76,16 +76,15 @@ export async function promptForDirectory(name: string): Promise<string> {
 }
 
 export async function promptForConfirmation(message: string): Promise<void> {
-  const { abort } = await prompts({
-    active: 'no',
-    inactive: 'yes',
+  const { confirmed } = await prompts({
+    initial: true,
     message: reset(message),
-    name: 'abort',
+    name: 'confirmed',
     onState: onPromptStateChange,
-    type: 'toggle',
+    type: 'confirm',
   })
 
-  if (abort) {
+  if (!confirmed) {
     throw new UserAbortError()
   }
 }
