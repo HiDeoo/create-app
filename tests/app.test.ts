@@ -7,6 +7,7 @@ import { createApp, updateApp } from '../src/app'
 import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
+import { parseTsConfig } from '../src/libs/typescript'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 
@@ -138,6 +139,30 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
 
     spawnMock.mockClear()
   })
+
+  test('should add or update the tsconfig.json file', async () => {
+    const { file, fixture } = await getTestContent(testDir, appName, 'tsconfig.json')
+
+    const fileTsConfig = parseTsConfig(file)
+    const fixtureTsConfig = parseTsConfig(fixture ?? '{}')
+
+    expect(fileTsConfig.extends).toBe('@hideoo/tsconfig')
+
+    let expectedCompilerOptions = 0
+
+    if (fixtureTsConfig.compilerOptions?.noEmit) {
+      expectedCompilerOptions += 1
+    }
+
+    if (fixtureTsConfig.compilerOptions?.target) {
+      expectedCompilerOptions += 1
+    }
+
+    expect(Object.keys(fileTsConfig.compilerOptions ?? {}).length).toBe(expectedCompilerOptions)
+
+    expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
+    expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
+  })
 })
 
 function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
@@ -155,7 +180,7 @@ function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?:
     return
   }
 
-  expect(Object.keys(newDeps)).toEqual(Object.keys(oldDeps))
+  expect(Object.keys(newDeps)).toEqual(expect.arrayContaining(Object.keys(oldDeps)))
 }
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {

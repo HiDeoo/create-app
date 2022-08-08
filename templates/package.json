@@ -3,6 +3,7 @@
   "bugs": "https://github.com/HiDeoo/{{APP_NAME}}/issues",
   "description": "",
   "devDependencies": {
+    "@hideoo/tsconfig": "…",
     "typescript": "…"
   },
   "engines": {
