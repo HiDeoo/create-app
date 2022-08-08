@@ -104,8 +104,6 @@ describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
 
     expect(filePkg.license).toBe(templatePkg.license)
 
-    // TODO(HiDeoo) main
-
     expect(filePkg.name).toBe(appName)
 
     expect(filePkg.packageManager).toBe(`${PACKAGE_MANAGER}@la.te.st`)

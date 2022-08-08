@@ -16,7 +16,6 @@
   "homepage": "https://github.com/HiDeoo/{{APP_NAME}}",
   "keywords": [],
   "license": "MIT",
-  "main": "// TODO",
   "name": "{{APP_NAME}}",
   "packageManager": "…",
   "prettier": "@hideoo/prettier-config",
