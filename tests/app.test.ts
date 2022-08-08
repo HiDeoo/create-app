@@ -2,7 +2,7 @@ import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest'
 
 import { createApp, updateApp } from '../src/app'
-import { PACKAGE_MANAGER } from '../src/config'
+import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
 
@@ -34,7 +34,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
   beforeAll(async () => {
     await beforeTest()
 
-    templateVariables = { APP_NAME: appName, YEAR: new Date().getFullYear() }
+    templateVariables = { APP_NAME: appName, NODE_VERSION, YEAR: new Date().getFullYear() }
 
     return setup(testDir, appName)
   })
@@ -62,17 +62,16 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     const templatePkg = parsePkg(template)
 
     expect(filePkg.author).toBe(templatePkg.author)
-    assert(isString(templatePkg.bugs))
-    assert(isString(filePkg.bugs))
+    assert(isString(templatePkg.bugs) && isString(filePkg.bugs))
     expectCompiledTemplate(templatePkg.bugs, filePkg.bugs, templateVariables)
     expect(filePkg.description).toBe(templatePkg.description)
     // TODO(HiDeoo) dependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.dependencies)
     // TODO(HiDeoo) devDependencies (persist existing)
     expectPinnedDependenciesToLatest(filePkg.devDependencies)
-    // TODO(HiDeoo) engine
-    assert(isString(templatePkg.homepage))
-    assert(isString(filePkg.homepage))
+    assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
+    expectCompiledTemplate(templatePkg.engines?.['node'], filePkg.engines?.['node'], templateVariables)
+    assert(isString(templatePkg.homepage) && isString(filePkg.homepage))
     expectCompiledTemplate(templatePkg.homepage, filePkg.homepage, templateVariables)
     expect(filePkg.keywords).toEqual(templatePkg.keywords)
     expect(filePkg.license).toBe(templatePkg.license)
@@ -80,8 +79,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     expect(filePkg.name).toBe(appName)
     expect(filePkg.packageManager).toBe(`${PACKAGE_MANAGER}@la.te.st`)
     expect(filePkg.private).toBe(templatePkg.private)
-    assert(isRepositoryObject(templatePkg.repository))
-    assert(isRepositoryObject(filePkg.repository))
+    assert(isRepositoryObject(templatePkg.repository) && isRepositoryObject(filePkg.repository))
     expectCompiledTemplate(templatePkg.repository.url, filePkg.repository.url, templateVariables)
     expect(filePkg.repository.type).toBe(templatePkg.repository.type)
     // TODO(HiDeoo) scripts

@@ -6,7 +6,7 @@
     "// TODO": "// TODO"
   },
   "engines": {
-    "node": "// TODO"
+    "node": ">={{NODE_VERSION}}"
   },
   "homepage": "https://github.com/HiDeoo/{{APP_NAME}}",
   "keywords": [],

@@ -4,10 +4,12 @@ import { fileURLToPath } from 'node:url'
 
 import glob from 'tiny-glob'
 
+import { NODE_VERSION } from '../config'
+
 // A set of templates which will not be automatically processed and requires special handling.
 const specialTemplates = new Set(['package.json'])
 
-const templateVariables = ['APP_NAME', 'YEAR'] as const
+const templateVariables = ['APP_NAME', 'NODE_VERSION', 'YEAR'] as const
 
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
@@ -67,6 +69,7 @@ function isValidTemplateVariable(variable: string): variable is keyof TemplateVa
 function getTemplateVariables(appName: string): TemplateVariables {
   return {
     APP_NAME: appName,
+    NODE_VERSION,
     YEAR: new Date().getFullYear(),
   }
 }
