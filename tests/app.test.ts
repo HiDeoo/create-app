@@ -2,8 +2,8 @@ import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest'
 
 import { createApp, updateApp } from '../src/app'
+import { PACKAGE_MANAGER } from '../src/config'
 import { parsePkg } from '../src/libs/npm'
-import { PACKAGE_MANAGER } from '../src/libs/pm'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 

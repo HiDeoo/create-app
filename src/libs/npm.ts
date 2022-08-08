@@ -4,7 +4,9 @@ import merge from 'lodash.merge'
 import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
-import { PACKAGE_MANAGER } from './pm'
+import { PACKAGE_MANAGER } from '../config'
+
+import { getPkgManagerLatestVersion } from './pm'
 import { getPkgLatestVersion } from './unpkg'
 
 export function isValidNpmPackageName(name: string) {
@@ -57,9 +59,9 @@ export function parsePkg(pkg: string): PackageJson {
 }
 
 export async function setPkgManagerToLatest(pkg: PackageJson) {
-  const latestPnpmVersion = await getPkgLatestVersion(PACKAGE_MANAGER)
+  const latestPmVersion = await getPkgManagerLatestVersion()
 
-  pkg.packageManager = `${PACKAGE_MANAGER}@${latestPnpmVersion}`
+  pkg.packageManager = `${PACKAGE_MANAGER}@${latestPmVersion}`
 
   return pkg
 }
