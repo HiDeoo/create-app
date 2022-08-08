@@ -7,6 +7,8 @@ import glob from 'tiny-glob'
 // A set of templates which will not be automatically processed and requires special handling.
 const specialTemplates = new Set(['package.json'])
 
+const templateVariables = ['APP_NAME', 'YEAR'] as const
+
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
 
@@ -38,9 +40,15 @@ export function getTemplateContent(templatePath: string) {
   return fs.readFile(templatePath, { encoding: 'utf8' })
 }
 
-export async function compileTemplate(content: string, data: Record<string, string | number>) {
+export async function compileTemplate(appName: string, content: string) {
+  const templateVariables = getTemplateVariables(appName)
+
   const compiledContent = content.replaceAll(/{{(\w+)}}/g, (_match, variable) => {
-    return data[variable] ?? variable
+    if (!isValidTemplateVariable(variable)) {
+      throw new Error(`Invalid template variable '${variable}'`)
+    }
+
+    return templateVariables[variable].toString()
   })
 
   return compiledContent
@@ -52,7 +60,22 @@ function getTemplatesPath() {
   return path.join(dirName, /src\/libs$/.test(dirName) ? '../..' : '..', 'templates')
 }
 
+function isValidTemplateVariable(variable: string): variable is keyof TemplateVariables {
+  return templateVariables.includes(variable as typeof templateVariables[number])
+}
+
+function getTemplateVariables(appName: string): TemplateVariables {
+  return {
+    APP_NAME: appName,
+    YEAR: new Date().getFullYear(),
+  }
+}
+
 interface Template {
   destination: string
   source: string
+}
+
+export type TemplateVariables = {
+  [key in typeof templateVariables[number]]: string | number
 }

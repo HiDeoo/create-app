@@ -4,6 +4,7 @@ import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest'
 import { createApp, updateApp } from '../src/app'
 import { PACKAGE_MANAGER } from '../src/config'
 import { parsePkg } from '../src/libs/npm'
+import { type TemplateVariables } from '../src/libs/template'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 
@@ -28,7 +29,7 @@ const testScenarios: TestScenario[] = [
 describe.each(testScenarios)('$description', ({ appName, setup }) => {
   const { afterTest, beforeTest, testDir } = setupTest(appName)
 
-  let templateVariables = {}
+  let templateVariables: TemplateVariables | undefined
 
   beforeAll(async () => {
     await beforeTest()
@@ -106,14 +107,13 @@ function expectPinnedDependenciesToLatest(dependencies?: PackageJson.Dependency)
   }
 }
 
-function expectCompiledTemplate(template: string, content: string, data: Record<string, string | number>) {
+function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {
   expect(
-    template.replaceAll(/{{(\w+)}}/g, (_match, variable) => {
-      if (!data[variable]) {
-        throw new Error(`Missing variable '${variable}' to compile template.`)
+    template.replaceAll(/{{(\w+)}}/g, (_match, variable: keyof TemplateVariables) => {
+      if (!variables) {
+        throw new Error('No template variables provided.')
       }
-
-      return data[variable] ?? variable
+      return variables[variable].toString()
     })
   ).toBe(content)
 }

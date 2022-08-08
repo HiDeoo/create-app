@@ -29,12 +29,10 @@ async function copyTemplates(appName: string, appPath: string) {
 
   const templatePaths = await getTemplatePaths()
 
-  const templateVariables = { APP_NAME: appName, YEAR: new Date().getFullYear() }
-
   return Promise.all(
     templatePaths.map(async ({ destination, source }) => {
       const templateContent = await getTemplateContent(source)
-      const compiledTemplate = await compileTemplate(templateContent, templateVariables)
+      const compiledTemplate = await compileTemplate(appName, templateContent)
 
       return writeAppFile(appPath, destination, compiledTemplate)
     })
@@ -56,7 +54,7 @@ async function copyPkg(appName: string, appPath: string) {
   pkg = await pinPkgDependenciesToLatest(pkg)
   pkg = await setPkgManagerToLatest(pkg)
 
-  const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2), { APP_NAME: appName })
+  const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
   return writeAppFile(appPath, fileName, compiledPkg)
 }
 
