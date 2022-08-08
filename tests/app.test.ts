@@ -16,6 +16,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'new-app',
     description: 'should create a new app',
+    isNew: true,
     setup: (testDir, appName) => createApp(appName, testDir),
   },
   {
@@ -45,7 +46,7 @@ vi.mock('node:child_process', async () => {
   }
 })
 
-describe.each(testScenarios)('$description', ({ appName, setup }) => {
+describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
   const { afterTest, beforeTest, testDir } = setupTest(appName)
 
   let templateVariables: TemplateVariables | undefined
@@ -118,7 +119,7 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
 
     expect(filePkg.repository.type).toBe(templatePkg.repository.type)
 
-    // TODO(HiDeoo) scripts
+    expect(filePkg.scripts?.['lint']).toBe(templatePkg.scripts?.['lint'])
 
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
 
@@ -133,12 +134,32 @@ describe.each(testScenarios)('$description', ({ appName, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should install dependencies', async () => {
+  test('should install dependencies and prettify the app', async () => {
     const spawnMock = vi.mocked(spawn)
 
-    expect(spawnMock).toHaveBeenCalledOnce()
-    expect(spawnMock.mock.lastCall?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.lastCall?.[1]).toEqual(['install', '-C', testDir])
+    expect(spawnMock).toHaveBeenCalledTimes(isNew ? 2 : 3)
+
+    expect(spawnMock.mock.calls[0]?.[0]).toBe(PACKAGE_MANAGER)
+    expect(spawnMock.mock.calls[0]?.[1]).toEqual(['-C', testDir, 'install'])
+
+    if (!isNew) {
+      expect(spawnMock.mock.calls[1]?.[0]).toBe(PACKAGE_MANAGER)
+      expect(spawnMock.mock.calls[1]?.[1]).toEqual(['-C', testDir, 'exec', 'eslint', '.', '--fix'])
+    }
+
+    const callIndex = isNew ? 1 : 2
+
+    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual([
+      '-C',
+      testDir,
+      'exec',
+      'prettier',
+      '-w',
+      '--loglevel',
+      'silent',
+      '.',
+    ])
 
     spawnMock.mockClear()
   })
@@ -228,5 +249,6 @@ function isRepositoryObject(value: unknown): value is NonNullable<Exclude<Packag
 interface TestScenario {
   appName: string
   description: string
+  isNew?: boolean
   setup: (testDir: string, appName: string) => Promise<void>
 }

@@ -9,17 +9,21 @@ import { isValidNpmPackageName } from './npm'
 
 const spinner = ora()
 
-export function logStep(message: string, newLine = false) {
+export function logStep(message: string) {
   if (spinner.isSpinning) {
     spinner.succeed()
   }
 
-  console.log(`${newLine ? '\n' : ''}${green('✔')} ${message}`)
+  console.log(`${green('✔')} ${message}`)
 }
 
-export function logStepWithProgress(message: string) {
+export function logStepWithProgress(message: string, prependNewLine = false) {
   if (spinner.isSpinning) {
     spinner.succeed()
+  }
+
+  if (prependNewLine) {
+    console.log('\n')
   }
 
   return spinner.start(message)

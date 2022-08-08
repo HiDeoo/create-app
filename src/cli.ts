@@ -1,3 +1,5 @@
+import { green } from 'kolorist'
+
 import { createApp, updateApp } from './app'
 import { cwdContainsPkg } from './libs/npm'
 import { logError, logStep, promptForDirectory, promptForName } from './libs/prompt'
@@ -17,7 +19,7 @@ async function run() {
       await createApp(name, path)
     }
 
-    logStep('Done', true)
+    logStep(green('Done!'))
   } catch (error) {
     logError(error)
 

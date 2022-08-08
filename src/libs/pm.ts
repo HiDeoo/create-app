@@ -10,13 +10,23 @@ export function getPkgManagerLatestVersion() {
 }
 
 export function installDependencies(appPath: string) {
+  return runPackageManager(appPath, ['install'], { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' })
+}
+
+export function runPackageManagerCommand(appPath: string, args: string[]) {
+  return runPackageManager(appPath, ['exec', ...args])
+}
+
+function runPackageManager(appPath: string, args: string[], env: NodeJS.ProcessEnv = {}) {
   return new Promise<void>((resolve, reject) => {
-    const child = spawn(PACKAGE_MANAGER, ['install', '-C', appPath], {
+    const argsWithCwd = ['-C', appPath, ...args]
+
+    const child = spawn(PACKAGE_MANAGER, argsWithCwd, {
+      env: { ...process.env, ...env },
       stdio: 'inherit',
-      env: { ...process.env, ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' },
     })
 
-    const errorMessage = `Unable to install dependencies with ${PACKAGE_MANAGER}.`
+    const errorMessage = `Unable to run package manager command: '${PACKAGE_MANAGER} ${argsWithCwd.join(' ')}'.`
 
     child.on('error', (error) => {
       reject(errorWithCause(errorMessage, error))

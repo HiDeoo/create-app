@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
-import { installDependencies } from './libs/pm'
+import { installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 import { mergeTsConfigs, parseTsConfig } from './libs/typescript'
@@ -11,7 +11,7 @@ import { mergeTsConfigs, parseTsConfig } from './libs/typescript'
 export async function updateApp(appName: string, appPath = process.cwd()) {
   await promptForConfirmation('Update the application?')
 
-  return bootstrapApp(appName, appPath)
+  return bootstrapApp(appName, appPath, { isNew: false })
 }
 
 export async function createApp(appName: string, appPath: string) {
@@ -19,16 +19,16 @@ export async function createApp(appName: string, appPath: string) {
 
   await fs.mkdir(appPath, { recursive: true })
 
-  return bootstrapApp(appName, appPath)
+  return bootstrapApp(appName, appPath, { isNew: true })
 }
 
-async function bootstrapApp(appName: string, appPath: string) {
+async function bootstrapApp(appName: string, appPath: string, options: AppOptions) {
   await copyTemplates(appName, appPath)
   await copyPkg(appName, appPath)
   await copyTsConfig(appPath)
   await copyEsLintConfig(appPath)
-
-  return install(appPath)
+  await install(appPath)
+  await prettify(appPath, options.isNew)
 }
 
 async function copyTemplates(appName: string, appPath: string) {
@@ -98,10 +98,20 @@ async function copyEsLintConfig(appPath: string) {
   return writeAppJsonFile(appPath, fileName, esLintConfig)
 }
 
-function install(appPath: string) {
+async function install(appPath: string) {
   logStep('Preparing dependencies…\n')
 
-  return installDependencies(appPath)
+  await installDependencies(appPath)
+}
+
+async function prettify(appPath: string, isNew: boolean) {
+  logStepWithProgress('Prettifying application…', true)
+
+  if (!isNew) {
+    await runPackageManagerCommand(appPath, ['eslint', '.', '--fix'])
+  }
+
+  return runPackageManagerCommand(appPath, ['prettier', '-w', '--loglevel', 'silent', '.'])
 }
 
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
@@ -118,4 +128,8 @@ function writeAppFile(appPath: string, filePath: string, data: string) {
 
 function writeAppJsonFile(appPath: string, filePath: string, data: unknown) {
   return fs.writeFile(path.join(appPath, filePath), JSON.stringify(data, null, 2))
+}
+
+interface AppOptions {
+  isNew: boolean
 }
