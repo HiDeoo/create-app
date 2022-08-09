@@ -6,7 +6,7 @@ import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
 import { type AppOptions } from '../app'
-import { USER_NAME } from '../config'
+import { NODE_VERSION, USER_NAME } from '../config'
 
 import { getPkgLatestVersion } from './unpkg'
 
@@ -40,7 +40,7 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
     delete mergedPkg.type
   }
 
-  if (mergedPkg.scripts?.['lint'] && pkg.dependencies && Object.keys(pkg.dependencies).includes('next')) {
+  if (mergedPkg.scripts?.['lint'] && dependenciesContains(pkg.dependencies, 'next')) {
     // If updating a Next.js application, use the `next link` wrapper instead of ESLint.
     // https://github.com/vercel/next.js/blob/5d93753bc304fa65acb11e534126d37ce1d1ebe1/packages/next/cli/next-lint.ts
     mergedPkg.scripts['lint'] = mergedPkg.scripts['lint'].replace('eslint .', 'next lint -d .')
@@ -56,6 +56,10 @@ export async function pinPkgDependenciesToLatest(pkg: PackageJson) {
 
   if (pkg.devDependencies) {
     pkg.devDependencies = await pinDependenciesToLatest(pkg.devDependencies)
+
+    if (dependenciesContains(pkg.devDependencies, '@types/node')) {
+      pkg.devDependencies['@types/node'] = await getPkgLatestVersion(`@types/node@${NODE_VERSION}`)
+    }
   }
 
   return pkg
@@ -87,4 +91,12 @@ async function pinDependenciesToLatest(dependencies: PackageJson.Dependency) {
   }
 
   return deps
+}
+
+function dependenciesContains(dependencies: PackageJson.Dependency | undefined, name: string) {
+  if (!dependencies) {
+    return false
+  }
+
+  return Object.keys(dependencies).includes(name)
 }
