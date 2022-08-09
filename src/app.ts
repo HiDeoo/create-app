@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
+import { addRepositorySecret } from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess } from './libs/npm'
 import { installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
@@ -29,7 +30,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyEsLintConfig(appPath)
 
   if (options.access === 'public') {
-    await copyReleaseWorkflow(appPath)
+    await setupReleaseWorkflow(appName, appPath, options.npmToken)
   }
 
   await install(appPath)
@@ -103,7 +104,7 @@ async function copyEsLintConfig(appPath: string) {
   return writeAppJsonFile(appPath, fileName, esLintConfig)
 }
 
-async function copyReleaseWorkflow(appPath: string) {
+async function setupReleaseWorkflow(appName: string, appPath: string, npmToken: AppOptions['npmToken']) {
   const fileName = '.github/workflows/release.yml'
 
   logStepWithProgress('Configuring release workflow…')
@@ -111,7 +112,11 @@ async function copyReleaseWorkflow(appPath: string) {
   const template = await getTemplateContent(getTemplatePath(fileName))
   const compiledTemplate = await compileTemplate(appPath, template)
 
-  return writeAppFile(appPath, fileName, compiledTemplate)
+  await writeAppFile(appPath, fileName, compiledTemplate)
+
+  if (npmToken && npmToken.length > 0) {
+    await addRepositorySecret(`HiDeoo/${appName}`, 'NPM_TOKEN', npmToken)
+  }
 }
 
 async function install(appPath: string) {
@@ -157,4 +162,5 @@ function ensureDirectory(dirPath: string) {
 export interface AppOptions {
   access: 'private' | 'public'
   isNew: boolean
+  npmToken?: string
 }

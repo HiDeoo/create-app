@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 
 import merge from 'lodash.merge'
+import open from 'open'
 import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
@@ -71,6 +72,10 @@ export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
   }
 
   return pkg
+}
+
+export function openNewNpmTokenPage() {
+  open('https://www.npmjs.com/settings/hideoo/tokens/new')
 }
 
 async function pinDependenciesToLatest(dependencies: PackageJson.Dependency) {

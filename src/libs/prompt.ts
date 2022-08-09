@@ -106,6 +106,17 @@ export async function promptForConfirmation(message: string): Promise<void> {
   }
 }
 
+export async function promptForToken(message: string): Promise<string> {
+  const { token } = await prompts({
+    message: reset(message),
+    name: 'token',
+    onState: onPromptStateChange,
+    type: 'password',
+  })
+
+  return token
+}
+
 function onPromptStateChange(state: PromptState) {
   if (state.aborted) {
     process.nextTick(() => {

@@ -22,7 +22,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'new-public-app',
     description: 'should create a new public app',
-    options: { access: 'public', isNew: true },
+    options: { access: 'public', isNew: true, npmToken: 'token' },
     setup: (testDir, appName, options) => createApp(appName, testDir, options),
   },
   {
@@ -34,7 +34,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'vite-react-ts',
     description: 'should update a public Vite app with React & TypeScript',
-    options: { access: 'public', isNew: false },
+    options: { access: 'public', isNew: false, npmToken: 'token' },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
@@ -158,20 +158,41 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should install dependencies and prettify the app', async () => {
+  test('should install dependencies, optionally setup the npm automation access token, and prettify the app', async () => {
     const spawnMock = vi.mocked(spawn)
 
-    expect(spawnMock).toHaveBeenCalledTimes(options.isNew ? 2 : 3)
+    const hasNpmToken = options.npmToken && options.npmToken.length > 0
 
-    expect(spawnMock.mock.calls[0]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[0]?.[1]).toEqual(['-C', testDir, 'install'])
+    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 2 : 3) + (hasNpmToken ? 1 : 0))
 
-    if (!options.isNew) {
-      expect(spawnMock.mock.calls[1]?.[0]).toBe(PACKAGE_MANAGER)
-      expect(spawnMock.mock.calls[1]?.[1]).toEqual(['-C', testDir, 'exec', 'eslint', '.', '--fix'])
+    let callIndex = 0
+
+    if (hasNpmToken) {
+      expect(spawnMock.mock.calls[0]?.[0]).toBe('gh')
+      expect(spawnMock.mock.calls[0]?.[1]).toEqual([
+        'secret',
+        'set',
+        'NPM_TOKEN',
+        '-R',
+        `HiDeoo/${appName}`,
+        '-b',
+        options.npmToken,
+      ])
+
+      callIndex++
     }
 
-    const callIndex = options.isNew ? 1 : 2
+    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['-C', testDir, 'install'])
+
+    callIndex++
+
+    if (!options.isNew) {
+      expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
+      expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['-C', testDir, 'exec', 'eslint', '.', '--fix'])
+
+      callIndex++
+    }
 
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
     expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual([
