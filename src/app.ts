@@ -27,6 +27,11 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyPkg(appName, appPath, options.access)
   await copyTsConfig(appPath)
   await copyEsLintConfig(appPath)
+
+  if (options.access === 'public') {
+    await copyReleaseWorkflow(appPath)
+  }
+
   await install(appPath)
   await prettify(appPath, options.isNew)
 }
@@ -96,6 +101,17 @@ async function copyEsLintConfig(appPath: string) {
   const esLintConfig = mergeEsLintConfigs(existingEsLintConfig, templateEsLintConfig)
 
   return writeAppJsonFile(appPath, fileName, esLintConfig)
+}
+
+async function copyReleaseWorkflow(appPath: string) {
+  const fileName = '.github/workflows/release.yml'
+
+  logStepWithProgress('Configuring release workflow…')
+
+  const template = await getTemplateContent(getTemplatePath(fileName))
+  const compiledTemplate = await compileTemplate(appPath, template)
+
+  return writeAppFile(appPath, fileName, compiledTemplate)
 }
 
 async function install(appPath: string) {
