@@ -5,9 +5,7 @@ import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
 import { type AppOptions } from '../app'
-import { PACKAGE_MANAGER } from '../config'
 
-import { getPkgManagerLatestVersion } from './pm'
 import { getPkgLatestVersion } from './unpkg'
 
 export function isValidNpmPackageName(name: string) {
@@ -63,14 +61,6 @@ export async function pinPkgDependenciesToLatest(pkg: PackageJson) {
 
 export function parsePkg(pkg: string): PackageJson {
   return JSON.parse(pkg)
-}
-
-export async function setPkgManagerToLatest(pkg: PackageJson) {
-  const latestPmVersion = await getPkgManagerLatestVersion()
-
-  pkg.packageManager = `${PACKAGE_MANAGER}@${latestPmVersion}`
-
-  return pkg
 }
 
 export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {

@@ -68,7 +68,13 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   beforeAll(async () => {
     await beforeTest()
 
-    templateVariables = { APP_NAME: appName, NODE_VERSION, YEAR: new Date().getFullYear() }
+    templateVariables = {
+      APP_NAME: appName,
+      PACKAGE_MANAGER,
+      PACKAGE_MANAGER_VERSION: 'la.te.st',
+      NODE_VERSION,
+      YEAR: new Date().getFullYear(),
+    }
 
     return setup(testDir, appName, options)
   })
@@ -231,6 +237,12 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(file).toBe(template)
   })
+
+  test('should add the integration workflow', async () => {
+    const { file, template } = await getTestContent(testDir, appName, '.github/workflows/integration.yml')
+
+    expectCompiledTemplate(template, file, templateVariables)
+  })
 })
 
 function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
@@ -253,7 +265,7 @@ function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?:
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {
   expect(
-    template.replaceAll(/{{(\w+)}}/g, (_match, variable: keyof TemplateVariables) => {
+    template.replaceAll(/\[\[(\w+)]]/g, (_match, variable: keyof TemplateVariables) => {
       if (!variables) {
         throw new Error('No template variables provided.')
       }

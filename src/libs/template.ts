@@ -4,12 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 import glob from 'tiny-glob'
 
-import { NODE_VERSION } from '../config'
+import { NODE_VERSION, PACKAGE_MANAGER } from '../config'
+
+import { getPkgManagerLatestVersion } from './pm'
 
 // A set of templates which will not be automatically processed and requires special handling.
 const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json'])
 
-const templateVariables = ['APP_NAME', 'NODE_VERSION', 'YEAR'] as const
+const templateVariables = ['APP_NAME', 'PACKAGE_MANAGER', 'PACKAGE_MANAGER_VERSION', 'NODE_VERSION', 'YEAR'] as const
 
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
@@ -43,9 +45,9 @@ export function getTemplateContent(templatePath: string) {
 }
 
 export async function compileTemplate(appName: string, content: string) {
-  const templateVariables = getTemplateVariables(appName)
+  const templateVariables = await getTemplateVariables(appName)
 
-  const compiledContent = content.replaceAll(/{{(\w+)}}/g, (_match, variable) => {
+  const compiledContent = content.replaceAll(/\[\[(\w+)]]/g, (_match, variable) => {
     if (!isValidTemplateVariable(variable)) {
       throw new Error(`Invalid template variable '${variable}'`)
     }
@@ -66,9 +68,17 @@ function isValidTemplateVariable(variable: string): variable is keyof TemplateVa
   return templateVariables.includes(variable as typeof templateVariables[number])
 }
 
-function getTemplateVariables(appName: string): TemplateVariables {
+async function getTemplateVariables(appName: string): Promise<TemplateVariables> {
+  const latestPmVersion = await getPkgManagerLatestVersion()
+
+  if (!latestPmVersion) {
+    throw new Error('Unable to get latest package manager version.')
+  }
+
   return {
     APP_NAME: appName,
+    PACKAGE_MANAGER,
+    PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
     YEAR: new Date().getFullYear(),
   }

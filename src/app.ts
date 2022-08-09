@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
-import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, setPkgManagerToLatest } from './libs/npm'
+import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess } from './libs/npm'
 import { installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
@@ -59,7 +59,6 @@ async function copyPkg(appName: string, appPath: string, access: AppOptions['acc
 
   let pkg = mergePkgs(existingPkg, templatePkg)
   pkg = await pinPkgDependenciesToLatest(pkg)
-  pkg = await setPkgManagerToLatest(pkg)
   pkg = setPkgAccess(pkg, access)
 
   const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
@@ -123,12 +122,20 @@ async function readAppFile(appPath: string, filePath: string): Promise<string | 
   }
 }
 
-function writeAppFile(appPath: string, filePath: string, data: string) {
-  return fs.writeFile(path.join(appPath, filePath), data)
+async function writeAppFile(appPath: string, filePath: string, data: string) {
+  const absolutePath = path.join(appPath, filePath)
+
+  await ensureDirectory(path.dirname(absolutePath))
+
+  return fs.writeFile(absolutePath, data)
 }
 
 function writeAppJsonFile(appPath: string, filePath: string, data: unknown) {
-  return fs.writeFile(path.join(appPath, filePath), JSON.stringify(data, null, 2))
+  return writeAppFile(appPath, filePath, JSON.stringify(data, null, 2))
+}
+
+function ensureDirectory(dirPath: string) {
+  return fs.mkdir(dirPath, { recursive: true })
 }
 
 export interface AppOptions {
