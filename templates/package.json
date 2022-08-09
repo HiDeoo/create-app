@@ -20,7 +20,7 @@
   "license": "MIT",
   "lint-staged": {
     "**/*": "prettier -w -u --cache",
-    "**/*.ts": "eslint --max-warnings=0"
+    "**/*.{js,jsx,ts,tsx,cjs,mjs}": "eslint --max-warnings=0"
   },
   "name": "[[APP_NAME]]",
   "packageManager": "[[PACKAGE_MANAGER]]@[[PACKAGE_MANAGER_VERSION]]",
