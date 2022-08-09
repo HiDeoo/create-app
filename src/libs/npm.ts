@@ -40,6 +40,12 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
     delete mergedPkg.type
   }
 
+  if (mergedPkg.scripts?.['lint'] && pkg.dependencies && Object.keys(pkg.dependencies).includes('next')) {
+    // If updating a Next.js application, use the `next link` wrapper instead of ESLint.
+    // https://github.com/vercel/next.js/blob/5d93753bc304fa65acb11e534126d37ce1d1ebe1/packages/next/cli/next-lint.ts
+    mergedPkg.scripts['lint'] = mergedPkg.scripts['lint'].replace('eslint .', 'next lint -d .')
+  }
+
   return mergedPkg
 }
 

@@ -133,7 +133,11 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(filePkg.repository.type).toBe(templatePkg.repository.type)
 
-    expect(filePkg.scripts?.['lint']).toBe(templatePkg.scripts?.['lint'])
+    if (filePkg.dependencies && Object.keys(filePkg.dependencies).includes('next')) {
+      expect(filePkg.scripts?.['lint']).toBe(templatePkg.scripts?.['lint']?.replace('eslint .', 'next lint -d .'))
+    } else {
+      expect(filePkg.scripts?.['lint']).toBe(templatePkg.scripts?.['lint'])
+    }
 
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
 
