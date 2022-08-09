@@ -1,6 +1,8 @@
 import merge from 'lodash.merge'
 import { type TsConfigJson } from 'type-fest'
 
+export const PRESERVED_TS_COMPILER_OPTIONS = new Set(['allowJs', 'jsx', 'noEmit', 'target'])
+
 export function parseTsConfig(config: string): TsConfigJson {
   return JSON.parse(config)
 }
@@ -8,20 +10,11 @@ export function parseTsConfig(config: string): TsConfigJson {
 export function mergeTsConfigs(config: TsConfigJson, source: TsConfigJson) {
   const mergedTsConfig = merge({}, config, source)
 
-  // Clear all compiler options.
-  delete mergedTsConfig.compilerOptions
-
-  if (config.compilerOptions?.noEmit || config.compilerOptions?.target) {
-    mergedTsConfig.compilerOptions = {}
-
-    // Restore the noEmit option if any.
-    if (config.compilerOptions?.noEmit) {
-      mergedTsConfig.compilerOptions.noEmit = config.compilerOptions.noEmit
-    }
-
-    // Restore the target option if any.
-    if (config.compilerOptions?.target) {
-      mergedTsConfig.compilerOptions.target = config.compilerOptions.target
+  if (mergedTsConfig.compilerOptions) {
+    for (const compilerOption of Object.keys(mergedTsConfig.compilerOptions)) {
+      if (!PRESERVED_TS_COMPILER_OPTIONS.has(compilerOption)) {
+        delete mergedTsConfig.compilerOptions[compilerOption as keyof TsConfigJson['compilerOptions']]
+      }
     }
   }
 

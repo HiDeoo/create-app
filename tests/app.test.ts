@@ -8,7 +8,7 @@ import { NODE_VERSION, PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE, USER_MAIL, USER
 import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
-import { parseTsConfig } from '../src/libs/typescript'
+import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 
@@ -233,16 +233,18 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     let expectedCompilerOptions = 0
 
-    if (fixtureTsConfig.compilerOptions?.noEmit) {
-      expectedCompilerOptions += 1
-    }
-
-    if (fixtureTsConfig.compilerOptions?.target) {
-      expectedCompilerOptions += 1
+    if (fixtureTsConfig.compilerOptions) {
+      for (const compilerOptions of PRESERVED_TS_COMPILER_OPTIONS) {
+        if (compilerOptions in fixtureTsConfig.compilerOptions) {
+          expectedCompilerOptions += 1
+        }
+      }
     }
 
     expect(Object.keys(fileTsConfig.compilerOptions ?? {}).length).toBe(expectedCompilerOptions)
 
+    expect(fileTsConfig.compilerOptions?.allowJs).toBe(fixtureTsConfig.compilerOptions?.allowJs)
+    expect(fileTsConfig.compilerOptions?.jsx).toBe(fixtureTsConfig.compilerOptions?.jsx)
     expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
     expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
   })
