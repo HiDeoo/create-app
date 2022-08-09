@@ -9,6 +9,9 @@
 </div>
 
 <div align="center">
+  <a href="https://github.com/HiDeoo/[[APP_NAME]]/actions/workflows/integration.yml">
+    <img alt="Integration Status" src="https://github.com/HiDeoo/[[APP_NAME]]/actions/workflows/integration.yml/badge.svg" />
+  </a>
   <a href="https://github.com/HiDeoo/[[APP_NAME]]/blob/main/LICENSE">
     <img alt="License" src="https://badgen.net/github/license/hideoo/[[APP_NAME]]" />
   </a>
