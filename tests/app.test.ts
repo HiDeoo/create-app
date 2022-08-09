@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process'
 import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
-import { createApp, updateApp } from '../src/app'
+import { type AppOptions, createApp, updateApp } from '../src/app'
 import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
 import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/npm'
@@ -14,20 +14,34 @@ import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './
 
 const testScenarios: TestScenario[] = [
   {
-    appName: 'new-app',
-    description: 'should create a new app',
-    isNew: true,
-    setup: (testDir, appName) => createApp(appName, testDir),
+    appName: 'new-private-app',
+    description: 'should create a new private app',
+    options: { access: 'private', isNew: true },
+    setup: (testDir, appName, options) => createApp(appName, testDir, options),
+  },
+  {
+    appName: 'new-public-app',
+    description: 'should create a new public app',
+    options: { access: 'public', isNew: true },
+    setup: (testDir, appName, options) => createApp(appName, testDir, options),
   },
   {
     appName: 'vite-react-ts',
-    description: 'should update a Vite app with React & TypeScript',
-    setup: (testDir, appName) => updateApp(appName, testDir),
+    description: 'should update a private Vite app with React & TypeScript',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'vite-react-ts',
+    description: 'should update a public Vite app with React & TypeScript',
+    options: { access: 'public', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
     appName: 'next-ts',
-    description: 'should update a Next.js app with TypeScript',
-    setup: (testDir, appName) => updateApp(appName, testDir),
+    description: 'should update a private Next.js app with TypeScript',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
 ]
 
@@ -46,7 +60,7 @@ vi.mock('node:child_process', async () => {
   }
 })
 
-describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
+describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   const { afterTest, beforeTest, testDir } = setupTest(appName)
 
   let templateVariables: TemplateVariables | undefined
@@ -56,7 +70,7 @@ describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
 
     templateVariables = { APP_NAME: appName, NODE_VERSION, YEAR: new Date().getFullYear() }
 
-    return setup(testDir, appName)
+    return setup(testDir, appName, options)
   })
 
   afterAll(() => afterTest())
@@ -110,7 +124,9 @@ describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
 
     expect(filePkg.prettier).toBe(templatePkg.prettier)
 
-    expect(filePkg.private).toBe(templatePkg.private)
+    expect(filePkg.private).toBe(options.access === 'private' ? true : undefined)
+
+    expect(filePkg.publishConfig).toEqual(options.access === 'private' ? undefined : templatePkg.publishConfig)
 
     assert(isRepositoryObject(templatePkg.repository) && isRepositoryObject(filePkg.repository))
     expectCompiledTemplate(templatePkg.repository.url, filePkg.repository.url, templateVariables)
@@ -135,17 +151,17 @@ describe.each(testScenarios)('$description', ({ appName, isNew, setup }) => {
   test('should install dependencies and prettify the app', async () => {
     const spawnMock = vi.mocked(spawn)
 
-    expect(spawnMock).toHaveBeenCalledTimes(isNew ? 2 : 3)
+    expect(spawnMock).toHaveBeenCalledTimes(options.isNew ? 2 : 3)
 
     expect(spawnMock.mock.calls[0]?.[0]).toBe(PACKAGE_MANAGER)
     expect(spawnMock.mock.calls[0]?.[1]).toEqual(['-C', testDir, 'install'])
 
-    if (!isNew) {
+    if (!options.isNew) {
       expect(spawnMock.mock.calls[1]?.[0]).toBe(PACKAGE_MANAGER)
       expect(spawnMock.mock.calls[1]?.[1]).toEqual(['-C', testDir, 'exec', 'eslint', '.', '--fix'])
     }
 
-    const callIndex = isNew ? 1 : 2
+    const callIndex = options.isNew ? 1 : 2
 
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
     expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual([
@@ -253,6 +269,6 @@ function isRepositoryObject(value: unknown): value is NonNullable<Exclude<Packag
 interface TestScenario {
   appName: string
   description: string
-  isNew?: boolean
-  setup: (testDir: string, appName: string) => Promise<void>
+  options: AppOptions
+  setup: (testDir: string, appName: string, options: AppOptions) => Promise<void>
 }

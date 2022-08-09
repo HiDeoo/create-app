@@ -4,6 +4,7 @@ import merge from 'lodash.merge'
 import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
+import { type AppOptions } from '../app'
 import { PACKAGE_MANAGER } from '../config'
 
 import { getPkgManagerLatestVersion } from './pm'
@@ -62,6 +63,16 @@ export async function setPkgManagerToLatest(pkg: PackageJson) {
   const latestPmVersion = await getPkgManagerLatestVersion()
 
   pkg.packageManager = `${PACKAGE_MANAGER}@${latestPmVersion}`
+
+  return pkg
+}
+
+export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
+  if (access === 'public') {
+    delete pkg.private
+  } else {
+    delete pkg.publishConfig
+  }
 
   return pkg
 }

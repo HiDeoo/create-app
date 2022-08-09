@@ -20,6 +20,9 @@
   "packageManager": "…",
   "prettier": "@hideoo/prettier-config",
   "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "url": "https://github.com/HiDeoo/{{APP_NAME}}.git",
     "type": "git"

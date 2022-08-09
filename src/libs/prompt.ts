@@ -79,6 +79,19 @@ export async function promptForDirectory(name: string): Promise<string> {
   return path.resolve(newDirectory ? name : '.')
 }
 
+export async function promptForYesNo(message: string): Promise<boolean> {
+  const { response } = await prompts({
+    active: 'no',
+    inactive: 'yes',
+    message: reset(message),
+    name: 'response',
+    onState: onPromptStateChange,
+    type: 'toggle',
+  })
+
+  return !response
+}
+
 export async function promptForConfirmation(message: string): Promise<void> {
   const { confirmed } = await prompts({
     initial: true,

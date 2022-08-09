@@ -1,23 +1,34 @@
 import { green } from 'kolorist'
 
-import { createApp, updateApp } from './app'
+import { type AppOptions, createApp, updateApp } from './app'
 import { cwdContainsPkg } from './libs/npm'
-import { logError, logStep, promptForDirectory, promptForName } from './libs/prompt'
+import { logError, logStep, promptForDirectory, promptForName, promptForYesNo } from './libs/prompt'
 
 async function run() {
   try {
+    const options: AppOptions = { access: 'private', isNew: false }
+
     const pkgName = await cwdContainsPkg()
+
+    let name: string | undefined
+    let path: string | undefined
 
     if (pkgName) {
       logStep(`Found 'package.json' in the current directory, the app '${pkgName}' will be updated…`)
 
-      await updateApp(pkgName)
+      name = pkgName
+      path = process.cwd()
     } else {
-      const name = await promptForName()
-      const path = await promptForDirectory(name)
+      options.isNew = true
 
-      await createApp(name, path)
+      name = await promptForName()
+      path = await promptForDirectory(name)
     }
+
+    options.access = (await promptForYesNo('Public app?')) ? 'public' : 'private'
+
+    const builder = pkgName ? updateApp : createApp
+    await builder(name, path, options)
 
     logStep(green('Done!'))
   } catch (error) {

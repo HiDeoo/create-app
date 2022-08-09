@@ -2,29 +2,29 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
-import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgManagerToLatest } from './libs/npm'
+import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, setPkgManagerToLatest } from './libs/npm'
 import { installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 import { mergeTsConfigs, parseTsConfig } from './libs/typescript'
 
-export async function updateApp(appName: string, appPath = process.cwd()) {
+export async function updateApp(appName: string, appPath: string, options: AppOptions) {
   await promptForConfirmation('Update the application?')
 
-  return bootstrapApp(appName, appPath, { isNew: false })
+  return bootstrapApp(appName, appPath, options)
 }
 
-export async function createApp(appName: string, appPath: string) {
+export async function createApp(appName: string, appPath: string, options: AppOptions) {
   await promptForConfirmation('Create the application?')
 
   await fs.mkdir(appPath, { recursive: true })
 
-  return bootstrapApp(appName, appPath, { isNew: true })
+  return bootstrapApp(appName, appPath, options)
 }
 
 async function bootstrapApp(appName: string, appPath: string, options: AppOptions) {
   await copyTemplates(appName, appPath)
-  await copyPkg(appName, appPath)
+  await copyPkg(appName, appPath, options.access)
   await copyTsConfig(appPath)
   await copyEsLintConfig(appPath)
   await install(appPath)
@@ -46,7 +46,7 @@ async function copyTemplates(appName: string, appPath: string) {
   )
 }
 
-async function copyPkg(appName: string, appPath: string) {
+async function copyPkg(appName: string, appPath: string, access: AppOptions['access']) {
   const fileName = 'package.json'
 
   logStepWithProgress(`Brewing ${fileName}…`)
@@ -60,6 +60,7 @@ async function copyPkg(appName: string, appPath: string) {
   let pkg = mergePkgs(existingPkg, templatePkg)
   pkg = await pinPkgDependenciesToLatest(pkg)
   pkg = await setPkgManagerToLatest(pkg)
+  pkg = setPkgAccess(pkg, access)
 
   const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
 
@@ -130,6 +131,7 @@ function writeAppJsonFile(appPath: string, filePath: string, data: unknown) {
   return fs.writeFile(path.join(appPath, filePath), JSON.stringify(data, null, 2))
 }
 
-interface AppOptions {
+export interface AppOptions {
+  access: 'private' | 'public'
   isNew: boolean
 }
