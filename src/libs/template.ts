@@ -4,14 +4,23 @@ import { fileURLToPath } from 'node:url'
 
 import glob from 'tiny-glob'
 
-import { NODE_VERSION, PACKAGE_MANAGER } from '../config'
+import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '../config'
 
 import { getPkgManagerLatestVersion } from './pm'
 
 // A set of templates which will not be automatically processed and requires special handling.
 const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json', '.github/workflows/release.yml'])
 
-const templateVariables = ['APP_NAME', 'PACKAGE_MANAGER', 'PACKAGE_MANAGER_VERSION', 'NODE_VERSION', 'YEAR'] as const
+const templateVariables = [
+  'APP_NAME',
+  'PACKAGE_MANAGER',
+  'PACKAGE_MANAGER_VERSION',
+  'NODE_VERSION',
+  'USER_MAIL',
+  'USER_NAME',
+  'USER_SITE',
+  'YEAR',
+] as const
 
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
@@ -80,6 +89,9 @@ async function getTemplateVariables(appName: string): Promise<TemplateVariables>
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
+    USER_NAME,
+    USER_MAIL,
+    USER_SITE,
     YEAR: new Date().getFullYear(),
   }
 }

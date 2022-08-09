@@ -1,6 +1,6 @@
 {
-  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
-  "bugs": "https://github.com/HiDeoo/[[APP_NAME]]/issues",
+  "author": "[[USER_NAME]] <[[USER_MAIL]]> ([[USER_SITE]])",
+  "bugs": "https://github.com/[[USER_NAME]]/[[APP_NAME]]/issues",
   "description": "",
   "devDependencies": {
     "@hideoo/eslint-config": "…",
@@ -13,7 +13,7 @@
   "engines": {
     "node": ">=[[NODE_VERSION]]"
   },
-  "homepage": "https://github.com/HiDeoo/[[APP_NAME]]",
+  "homepage": "https://github.com/[[USER_NAME]]/[[APP_NAME]]",
   "keywords": [],
   "license": "MIT",
   "name": "[[APP_NAME]]",
@@ -24,7 +24,7 @@
     "access": "public"
   },
   "repository": {
-    "url": "https://github.com/HiDeoo/[[APP_NAME]].git",
+    "url": "https://github.com/[[USER_NAME]]/[[APP_NAME]].git",
     "type": "git"
   },
   "scripts": {

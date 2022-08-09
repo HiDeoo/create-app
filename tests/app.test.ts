@@ -4,7 +4,7 @@ import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { type AppOptions, createApp, updateApp } from '../src/app'
-import { NODE_VERSION, PACKAGE_MANAGER } from '../src/config'
+import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '../src/config'
 import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
@@ -73,6 +73,9 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
+      USER_NAME,
+      USER_MAIL,
+      USER_SITE,
       YEAR: new Date().getFullYear(),
     }
 
@@ -101,7 +104,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     const fixturePkg = parsePkg(fixture ?? '{}')
     const templatePkg = parsePkg(template)
 
-    expect(filePkg.author).toBe(templatePkg.author)
+    assert(isString(templatePkg.author) && isString(filePkg.author))
+    expectCompiledTemplate(templatePkg.author, filePkg.author, templateVariables)
 
     assert(isString(templatePkg.bugs) && isString(filePkg.bugs))
     expectCompiledTemplate(templatePkg.bugs, filePkg.bugs, templateVariables)
@@ -174,7 +178,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         'set',
         'NPM_TOKEN',
         '-R',
-        `HiDeoo/${appName}`,
+        `${USER_NAME}/${appName}`,
         '-b',
         options.npmToken,
       ])

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { addRepositorySecret } from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess } from './libs/npm'
@@ -115,7 +116,7 @@ async function setupReleaseWorkflow(appName: string, appPath: string, npmToken: 
   await writeAppFile(appPath, fileName, compiledTemplate)
 
   if (npmToken && npmToken.length > 0) {
-    await addRepositorySecret(`HiDeoo/${appName}`, 'NPM_TOKEN', npmToken)
+    await addRepositorySecret(`${USER_NAME}/${appName}`, 'NPM_TOKEN', npmToken)
   }
 }
 

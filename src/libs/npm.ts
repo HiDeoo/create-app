@@ -6,6 +6,7 @@ import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
 import { type AppOptions } from '../app'
+import { USER_NAME } from '../config'
 
 import { getPkgLatestVersion } from './unpkg'
 
@@ -75,7 +76,7 @@ export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
 }
 
 export function openNewNpmTokenPage() {
-  open('https://www.npmjs.com/settings/hideoo/tokens/new')
+  open(`https://www.npmjs.com/settings/${USER_NAME.toLowerCase()}/tokens/new`)
 }
 
 async function pinDependenciesToLatest(dependencies: PackageJson.Dependency) {
