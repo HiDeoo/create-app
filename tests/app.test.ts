@@ -244,16 +244,18 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test.skipIf(options.access === 'public')('should not add the release workflow to private app', async () => {
-    const testDirPaths = await getTestDirPaths(testDir)
+  test('should only add the release workflow to public app', async () => {
+    const fileName = '.github/workflows/release.yml'
 
-    expect(testDirPaths).not.toContain('/.github/workflows/release.yml')
-  })
+    if (options.access === 'private') {
+      const testDirPaths = await getTestDirPaths(testDir)
 
-  test.skipIf(options.access === 'private')('should add the release workflow to public app', async () => {
-    const { file, template } = await getTestContent(testDir, appName, '.github/workflows/release.yml')
+      expect(testDirPaths).not.toContain(`/${fileName}`)
+    } else {
+      const { file, template } = await getTestContent(testDir, appName, fileName)
 
-    expectCompiledTemplate(template, file, templateVariables)
+      expectCompiledTemplate(template, file, templateVariables)
+    }
   })
 })
 
