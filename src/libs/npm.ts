@@ -74,6 +74,7 @@ export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
     delete pkg.private
   } else {
     delete pkg.publishConfig
+    delete pkg.scripts?.['prepublishOnly']
   }
 
   return pkg

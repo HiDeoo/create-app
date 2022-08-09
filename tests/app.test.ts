@@ -149,6 +149,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       expect(filePkg.scripts?.['lint']).toBe(templatePkg.scripts?.['lint'])
     }
 
+    expect(filePkg.scripts?.['prepublishOnly']).toBe(
+      options.access === 'public' ? templatePkg.scripts?.['prepublishOnly'] : undefined
+    )
+
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
 
     expect(filePkg.type).toBe(fixturePkg.type ? fixturePkg.type : fixturePkg.name ? undefined : templatePkg.type)

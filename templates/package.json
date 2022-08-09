@@ -35,8 +35,9 @@
   },
   "scripts": {
     "lint": "prettier -c . && eslint . --max-warnings=0 && tsc --noEmit",
+    "test": "echo \"Error: no test implemented.\" && exit 1",
     "prepare": "husky install",
-    "test": "echo \"Error: no test implemented.\" && exit 1"
+    "prepublishOnly": "pnpm build"
   },
   "sideEffects": false,
   "type": "module",
