@@ -3,9 +3,10 @@ import path from 'node:path'
 
 import { USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
+import { initGitRepository, isGitRepository } from './libs/git'
 import { addRepositorySecret } from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess } from './libs/npm'
-import { installDependencies, runPackageManagerCommand } from './libs/pm'
+import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
 import { mergeTsConfigs, parseTsConfig } from './libs/typescript'
@@ -35,6 +36,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   }
 
   await install(appPath)
+  await addGitHooks(appPath)
   await prettify(appPath, options.isNew)
 }
 
@@ -126,8 +128,22 @@ async function install(appPath: string) {
   await installDependencies(appPath)
 }
 
+async function addGitHooks(appPath: string) {
+  logStepWithProgress('Configuring Git hooks…', true)
+
+  const isGitRepo = await isGitRepository(appPath)
+
+  if (!isGitRepo) {
+    await initGitRepository(appPath)
+  }
+
+  await runPackageManagerCommand(appPath, ['husky', 'install'], true)
+
+  return executePackageManagerCommand(appPath, ['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'], true)
+}
+
 async function prettify(appPath: string, isNew: boolean) {
-  logStepWithProgress('Prettifying application…', true)
+  logStepWithProgress('Prettifying application…')
 
   if (!isNew) {
     await runPackageManagerCommand(appPath, ['eslint', '.', '--fix'])

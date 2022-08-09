@@ -1,8 +1,6 @@
-import { spawn } from 'node:child_process'
+import { PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE } from '../config'
 
-import { PACKAGE_MANAGER } from '../config'
-
-import { errorWithCause } from './error'
+import { exec, type ExecOptions } from './exec'
 import { getPkgLatestVersion } from './unpkg'
 
 export function getPkgManagerLatestVersion() {
@@ -10,36 +8,21 @@ export function getPkgManagerLatestVersion() {
 }
 
 export function installDependencies(appPath: string) {
-  return runPackageManager(appPath, ['install'], { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' })
+  return runPackageManager(appPath, ['install'], { env: { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' } })
 }
 
-export function runPackageManagerCommand(appPath: string, args: string[]) {
-  return runPackageManager(appPath, ['exec', ...args])
+export function runPackageManagerCommand(appPath: string, args: string[], silent?: boolean) {
+  return runPackageManager(appPath, ['exec', ...args], { silent: !!silent })
 }
 
-function runPackageManager(appPath: string, args: string[], env: NodeJS.ProcessEnv = {}) {
-  return new Promise<void>((resolve, reject) => {
-    const argsWithCwd = ['-C', appPath, ...args]
+export function executePackageManagerCommand(appPath: string, args: string[], silent?: boolean) {
+  return runPackageManager(appPath, args, { execute: true, silent: !!silent })
+}
 
-    const child = spawn(PACKAGE_MANAGER, argsWithCwd, {
-      env: { ...process.env, ...env },
-      stdio: 'inherit',
-    })
+function runPackageManager(appPath: string, args: string[], options: RunOptions = {}) {
+  return exec(options.execute ? PACKAGE_MANAGER_EXECUTE : PACKAGE_MANAGER, args, { ...options, cwd: appPath })
+}
 
-    const errorMessage = `Unable to run package manager command: '${PACKAGE_MANAGER} ${argsWithCwd.join(' ')}'.`
-
-    child.on('error', (error) => {
-      reject(errorWithCause(errorMessage, error))
-    })
-
-    child.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(errorMessage))
-
-        return
-      }
-
-      resolve()
-    })
-  })
+interface RunOptions extends ExecOptions {
+  execute?: boolean
 }

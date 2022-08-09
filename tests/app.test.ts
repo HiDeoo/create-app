@@ -4,7 +4,7 @@ import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { type AppOptions, createApp, updateApp } from '../src/app'
-import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '../src/config'
+import { NODE_VERSION, PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE, USER_MAIL, USER_NAME, USER_SITE } from '../src/config'
 import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/npm'
 import { type TemplateVariables } from '../src/libs/template'
@@ -167,7 +167,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     const hasNpmToken = options.npmToken && options.npmToken.length > 0
 
-    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 2 : 3) + (hasNpmToken ? 1 : 0))
+    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 5 : 6) + (hasNpmToken ? 1 : 0))
 
     let callIndex = 0
 
@@ -187,28 +187,34 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     }
 
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['-C', testDir, 'install'])
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['install'])
+
+    callIndex++
+
+    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe('git')
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['rev-parse', '--is-inside-work-tree'])
+
+    callIndex++
+
+    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'husky', 'install'])
+
+    callIndex++
+
+    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER_EXECUTE)
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'])
 
     callIndex++
 
     if (!options.isNew) {
       expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-      expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['-C', testDir, 'exec', 'eslint', '.', '--fix'])
+      expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'eslint', '.', '--fix'])
 
       callIndex++
     }
 
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual([
-      '-C',
-      testDir,
-      'exec',
-      'prettier',
-      '-w',
-      '--loglevel',
-      'silent',
-      '.',
-    ])
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'prettier', '-w', '--loglevel', 'silent', '.'])
 
     spawnMock.mockClear()
   })
