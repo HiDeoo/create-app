@@ -5,17 +5,25 @@ import ora from 'ora'
 import prompts from 'prompts'
 
 import { UserAbortError } from './error'
-import { isValidNpmPackageName } from './npm'
+import { isValidPkgName } from './pkg'
 
 const spinner = ora()
 
 export function logStep(message: string) {
+  if (spinner.isSpinning) {
+    spinner.succeed()
+  }
+
   console.log(`${green('✔')} ${message}`)
 }
 
-export function logStepWithProgress(message: string) {
+export function logStepWithProgress(message: string, prependNewLine = false) {
   if (spinner.isSpinning) {
     spinner.succeed()
+  }
+
+  if (prependNewLine) {
+    console.log('\n')
   }
 
   return spinner.start(message)
@@ -51,7 +59,7 @@ export async function promptForName(): Promise<string> {
     onState: onPromptStateChange,
     type: 'text',
     validate: (value) =>
-      isValidNpmPackageName(value) ||
+      isValidPkgName(value) ||
       'Invalid app name, please check https://docs.npmjs.com/cli/v8/configuring-npm/package-json#name',
   })
 
@@ -71,19 +79,42 @@ export async function promptForDirectory(name: string): Promise<string> {
   return path.resolve(newDirectory ? name : '.')
 }
 
-export async function promptForConfirmation(message: string): Promise<void> {
-  const { abort } = await prompts({
+export async function promptForYesNo(message: string): Promise<boolean> {
+  const { response } = await prompts({
     active: 'no',
     inactive: 'yes',
     message: reset(message),
-    name: 'abort',
+    name: 'response',
     onState: onPromptStateChange,
     type: 'toggle',
   })
 
-  if (abort) {
+  return !response
+}
+
+export async function promptForConfirmation(message: string): Promise<void> {
+  const { confirmed } = await prompts({
+    initial: true,
+    message: reset(message),
+    name: 'confirmed',
+    onState: onPromptStateChange,
+    type: 'confirm',
+  })
+
+  if (!confirmed) {
     throw new UserAbortError()
   }
+}
+
+export async function promptForToken(message: string): Promise<string> {
+  const { token } = await prompts({
+    message: reset(message),
+    name: 'token',
+    onState: onPromptStateChange,
+    type: 'password',
+  })
+
+  return token
 }
 
 function onPromptStateChange(state: PromptState) {

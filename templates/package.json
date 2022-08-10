@@ -1,26 +1,43 @@
 {
-  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
-  "bugs": "https://github.com/HiDeoo/{{APP_NAME}}/issues",
+  "author": "[[USER_NAME]] <[[USER_MAIL]]> ([[USER_SITE]])",
+  "bugs": "https://github.com/[[USER_NAME]]/[[APP_NAME]]/issues",
   "description": "",
   "devDependencies": {
-    "// TODO": "// TODO"
+    "@hideoo/eslint-config": "…",
+    "@hideoo/prettier-config": "…",
+    "@hideoo/tsconfig": "…",
+    "eslint": "…",
+    "husky": "…",
+    "lint-staged": "…",
+    "prettier": "…",
+    "typescript": "…"
   },
   "engines": {
-    "node": "// TODO"
+    "node": ">=[[NODE_VERSION]]"
   },
-  "homepage": "https://github.com/HiDeoo/{{APP_NAME}}",
+  "homepage": "https://github.com/[[USER_NAME]]/[[APP_NAME]]",
   "keywords": [],
   "license": "MIT",
-  "main": "// TODO",
-  "name": "{{APP_NAME}}",
-  "packageManager": "…",
+  "lint-staged": {
+    "**/*": "prettier -w -u --cache",
+    "**/*.{js,jsx,ts,tsx,cjs,mjs}": "eslint --max-warnings=0"
+  },
+  "name": "[[APP_NAME]]",
+  "packageManager": "[[PACKAGE_MANAGER]]@[[PACKAGE_MANAGER_VERSION]]",
+  "prettier": "@hideoo/prettier-config",
   "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
-    "url": "https://github.com/HiDeoo/{{APP_NAME}}.git",
+    "url": "https://github.com/[[USER_NAME]]/[[APP_NAME]].git",
     "type": "git"
   },
   "scripts": {
-    "// TODO": "// TODO"
+    "lint": "prettier -c . && eslint . --max-warnings=0 && tsc --noEmit",
+    "test": "echo \"Error: no test implemented.\" && exit 1",
+    "prepare": "husky install",
+    "prepublishOnly": "pnpm build"
   },
   "sideEffects": false,
   "type": "module",

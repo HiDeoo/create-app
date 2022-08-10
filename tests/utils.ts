@@ -16,6 +16,7 @@ export function setupTest(testName: string) {
 
   let mockAgent: MockAgent | undefined
 
+  const logStepSpy = vi.spyOn(prompt, 'logStep').mockReturnValue()
   const confirmationPromptSpy = vi.spyOn(prompt, 'promptForConfirmation').mockResolvedValue()
   const logStepWithProgressSpy = vi.spyOn(prompt, 'logStepWithProgress').mockResolvedValue({} as Ora)
 
@@ -43,6 +44,7 @@ export function setupTest(testName: string) {
   }
 
   async function afterTest() {
+    logStepSpy.mockRestore()
     confirmationPromptSpy.mockRestore()
     logStepWithProgressSpy.mockRestore()
 
@@ -59,7 +61,7 @@ export function setupTest(testName: string) {
 }
 
 export async function getTestDirPaths(testDir: string) {
-  const testDirPaths = await glob(path.join(testDir, '**/*'), { absolute: true, filesOnly: true })
+  const testDirPaths = await glob(path.join(testDir, '**/*'), { absolute: true, dot: true, filesOnly: true })
 
   return testDirPaths.map((testDirPath) => testDirPath.replace(testDir, ''))
 }

@@ -1,36 +1,31 @@
-name: Release
+name: Integration
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_call:
 
 jobs:
-  integration:
-    name: Integration
-    uses: ./.github/workflows/integration.yml
-
-  publish:
-    name: Publish
-    needs:
-      - integration
+  lint_test:
+    name: Lint & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-          registry-url: 'https://registry.npmjs.org'
+          node-version: [[NODE_VERSION]]
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2.2.2
         with:
-          version: 7.8.0
+          version: [[PACKAGE_MANAGER_VERSION]]
           run_install: false
 
       - name: Get pnpm store directory path
@@ -49,12 +44,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Publish
-        run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Lint
+        run: pnpm lint
 
-      - name: Generate changelog
-        run: pnpx changelogithub
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Test
+        run: pnpm test
