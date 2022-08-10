@@ -49,6 +49,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - run: pnpx changelogithub
+      - name: Publish
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Generate changelog
+        run: pnpx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
