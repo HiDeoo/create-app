@@ -49,7 +49,7 @@ And that's it, no options, no configuration and no extra tweaks needed, you are 
   - Enforce the package manager to the latest version of pnpm (reused in GitHub Actions)
   - Enforce a minimum Node.js version (reused in GitHub Actions)
   - Optionally add the configuration for publishing to npm
-  - Sort all well-known fields based on [custom rules](blob/main/src/config.ts#L10)
+  - Sort all well-known fields based on [custom rules](src/config.ts#L10-L82)
 - Add various miscellaneous pre-filled files like `.gitignore`, `README.md` and `LICENSE`
 - Git
   - Initialize a new Git repository if needed
