@@ -35,6 +35,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
     await setupReleaseWorkflow(appName, appPath, options.npmToken)
   }
 
+  await setupGitRepository(appPath)
   await install(appPath)
   await addGitHooks(appPath)
   await prettify(appPath, options.isNew)
@@ -130,16 +131,18 @@ async function install(appPath: string) {
   await installDependencies(appPath)
 }
 
-async function addGitHooks(appPath: string) {
-  logStepWithProgress('Configuring Git hooks…', true)
-
+async function setupGitRepository(appPath: string) {
   const isGitRepo = await isGitRepository(appPath)
 
   if (!isGitRepo) {
+    logStepWithProgress('Baking Git repository…')
+
     await initGitRepository(appPath)
   }
+}
 
-  await runPackageManagerCommand(appPath, ['husky', 'install'], true)
+async function addGitHooks(appPath: string) {
+  logStepWithProgress('Configuring Git hooks…', true)
 
   return executePackageManagerCommand(appPath, ['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'], true)
 }
