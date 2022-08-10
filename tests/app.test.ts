@@ -188,7 +188,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     const hasNpmToken = options.npmToken && options.npmToken.length > 0
 
-    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 5 : 6) + (hasNpmToken ? 1 : 0))
+    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 4 : 5) + (hasNpmToken ? 1 : 0))
 
     let callIndex = 0
 
@@ -207,18 +207,13 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       callIndex++
     }
 
-    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['install'])
-
-    callIndex++
-
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe('git')
     expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['rev-parse', '--is-inside-work-tree'])
 
     callIndex++
 
     expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'husky', 'install'])
+    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['install'])
 
     callIndex++
 
