@@ -5,7 +5,7 @@ import ora from 'ora'
 import prompts from 'prompts'
 
 import { UserAbortError } from './error'
-import { isValidNpmPackageName } from './npm'
+import { isValidPkgName } from './pkg'
 
 const spinner = ora()
 
@@ -59,7 +59,7 @@ export async function promptForName(): Promise<string> {
     onState: onPromptStateChange,
     type: 'text',
     validate: (value) =>
-      isValidNpmPackageName(value) ||
+      isValidPkgName(value) ||
       'Invalid app name, please check https://docs.npmjs.com/cli/v8/configuring-npm/package-json#name',
   })
 

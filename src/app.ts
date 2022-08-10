@@ -5,7 +5,7 @@ import { USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { initGitRepository, isGitRepository } from './libs/git'
 import { addRepositorySecret } from './libs/github'
-import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess } from './libs/npm'
+import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
@@ -69,6 +69,7 @@ async function copyPkg(appName: string, appPath: string, access: AppOptions['acc
   let pkg = mergePkgs(existingPkg, templatePkg)
   pkg = await pinPkgDependenciesToLatest(pkg)
   pkg = setPkgAccess(pkg, access)
+  pkg = sortPkg(pkg)
 
   const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
 

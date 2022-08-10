@@ -1,7 +1,8 @@
 import { green } from 'kolorist'
 
 import { type AppOptions, createApp, updateApp } from './app'
-import { cwdContainsPkg, openNewNpmTokenPage } from './libs/npm'
+import { openNewNpmTokenPage } from './libs/npm'
+import { cwdContainsPkg } from './libs/pkg'
 import { logError, logStep, promptForDirectory, promptForName, promptForToken, promptForYesNo } from './libs/prompt'
 
 async function run() {

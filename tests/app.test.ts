@@ -4,9 +4,17 @@ import { type PackageJson } from 'type-fest'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { type AppOptions, createApp, updateApp } from '../src/app'
-import { NODE_VERSION, PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE, USER_MAIL, USER_NAME, USER_SITE } from '../src/config'
+import {
+  NODE_VERSION,
+  PACKAGE_MANAGER,
+  PACKAGE_MANAGER_EXECUTE,
+  PKG_KEYS_ORDER,
+  USER_MAIL,
+  USER_NAME,
+  USER_SITE,
+} from '../src/config'
 import { parseEsLintConfig } from '../src/libs/eslint'
-import { parsePkg } from '../src/libs/npm'
+import { parsePkg } from '../src/libs/pkg'
 import { type TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
 
@@ -158,6 +166,15 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(filePkg.type).toBe(fixturePkg.type ? fixturePkg.type : fixturePkg.name ? undefined : templatePkg.type)
 
     expect(filePkg.version).toBe(templatePkg.version)
+  })
+
+  test('should properly order the package.json file keys', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileKeys = Object.keys(parsePkg(file))
+    const knownKeysOrder = PKG_KEYS_ORDER.filter((key) => fileKeys.includes(key))
+
+    expect(fileKeys).toEqual(knownKeysOrder)
   })
 
   test('should add the readme file', async () => {
