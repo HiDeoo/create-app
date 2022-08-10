@@ -16,14 +16,14 @@
 
 Bootstrapping a new project always consists of the exact same steps like setting up TypeScript, installing dependencies, configuring a linter, adding various miscellaneous files and so on.
 
-`@hideoo/create-app` is a very opinionated CLI tool to help me quickly bootstrap a new project by either:
+`@hideoo/create-app` is a very opinionated CLI utility to help me quickly bootstrap a new project by either:
 
 - creating a new project from scratch
 - updating a new project generated with `pnpm create vite` or `pnpm create next-app`
 
 <br />
 
-> **Note**: [pnpm](https://pnpm.io) and the [GitHub CLI](https://cli.github.com) are required to use this tool.
+> **Note**: [pnpm](https://pnpm.io) and the [GitHub CLI](https://cli.github.com) are required to use this utility.
 
 ## Usage
 

@@ -1,6 +1,9 @@
 {
   "name": "@hideoo/create-app",
-  "author": "HiDeoo",
+  "description": "CLI utility to bootstrap a new project by creating a new app from scratch or update an existing app.",
+  "homepage": "https://github.com/HiDeoo/create-app",
+  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
+  "license": "MIT",
   "version": "0.0.2",
   "bin": "./cli.mjs",
   "type": "module",
@@ -45,8 +48,30 @@
     "vitest": "0.20.3"
   },
   "packageManager": "pnpm@7.8.0",
+  "files": [
+    "cli.mjs",
+    "dist",
+    "templates"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
   "engines": {
     "node": ">=16.0.0"
+  },
+  "keywords": [
+    "create",
+    "app",
+    "bootstrap",
+    "scaffold",
+    "automatic",
+    "configuration"
+  ],
+  "bugs": "https://github.com/HiDeoo/create-app/issues",
+  "repository": {
+    "url": "https://github.com/HiDeoo/create-app.git",
+    "type": "git"
   },
   "prettier": "@hideoo/prettier-config",
   "lint-staged": {
