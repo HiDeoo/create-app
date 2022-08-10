@@ -1,4 +1,6 @@
 import merge from 'lodash.merge'
+import sortObjectKey from 'sort-object-keys'
+import { sortPackageJson } from 'sort-package-json'
 import { type TsConfigJson } from 'type-fest'
 
 export const PRESERVED_TS_COMPILER_OPTIONS = new Set(['allowJs', 'jsx', 'noEmit', 'target'])
@@ -19,4 +21,14 @@ export function mergeTsConfigs(config: TsConfigJson, source: TsConfigJson) {
   }
 
   return mergedTsConfig
+}
+
+export function sortTsConfig(config: TsConfigJson) {
+  const sortedConfig = sortPackageJson(config, { sortOrder: ['extends', 'compilerOptions'] })
+
+  if (sortedConfig.compilerOptions) {
+    sortedConfig.compilerOptions = sortObjectKey(sortedConfig.compilerOptions)
+  }
+
+  return sortedConfig
 }

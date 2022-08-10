@@ -9,7 +9,7 @@ import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg 
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
-import { mergeTsConfigs, parseTsConfig } from './libs/typescript'
+import { mergeTsConfigs, parseTsConfig, sortTsConfig } from './libs/typescript'
 
 export async function updateApp(appName: string, appPath: string, options: AppOptions) {
   await promptForConfirmation('Update the application?')
@@ -87,7 +87,8 @@ async function copyTsConfig(appPath: string) {
   const templateTsConfig = parseTsConfig(template)
   const existingTsConfig = parseTsConfig(existing)
 
-  const tsConfig = mergeTsConfigs(existingTsConfig, templateTsConfig)
+  let tsConfig = mergeTsConfigs(existingTsConfig, templateTsConfig)
+  tsConfig = sortTsConfig(tsConfig)
 
   return writeAppJsonFile(appPath, fileName, tsConfig)
 }

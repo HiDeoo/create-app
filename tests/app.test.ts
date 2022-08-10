@@ -266,6 +266,24 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
   })
 
+  test('should partially order the tsconfig.json file keys', async () => {
+    const { file } = await getTestContent(testDir, appName, 'tsconfig.json')
+
+    const fileKeys = Object.keys(parsePkg(file))
+
+    expect(fileKeys[0]).toBe('extends')
+
+    if (fileKeys[1]) {
+      expect(fileKeys[1]).toBe('compilerOptions')
+    }
+  })
+
+  test('should add the readme file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'README.md')
+
+    expectCompiledTemplate(template, file, templateVariables)
+  })
+
   test('should add or update the .eslintrc.json file', async () => {
     const { file, fixture } = await getTestContent(testDir, appName, '.eslintrc.json')
 

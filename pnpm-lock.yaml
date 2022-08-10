@@ -9,6 +9,7 @@ specifiers:
   '@types/lodash.merge': 4.6.7
   '@types/node': 16.11.46
   '@types/prompts': 2.0.14
+  '@types/sort-object-keys': 1.1.0
   '@types/validate-npm-package-name': 4.0.0
   eslint: 8.21.0
   husky: 8.0.1
@@ -19,6 +20,7 @@ specifiers:
   ora: 6.1.2
   prettier: 2.7.1
   prompts: 2.4.2
+  sort-object-keys: 1.1.3
   sort-package-json: 1.57.0
   tiny-glob: 0.2.9
   type-fest: 2.18.0
@@ -34,6 +36,7 @@ dependencies:
   open: 8.4.0
   ora: 6.1.2
   prompts: 2.4.2
+  sort-object-keys: 1.1.3
   sort-package-json: 1.57.0
   tiny-glob: 0.2.9
   undici: 5.8.1
@@ -48,6 +51,7 @@ devDependencies:
   '@types/lodash.merge': 4.6.7
   '@types/node': 16.11.46
   '@types/prompts': 2.0.14
+  '@types/sort-object-keys': 1.1.0
   '@types/validate-npm-package-name': 4.0.0
   eslint: 8.21.0
   husky: 8.0.1
@@ -624,6 +628,10 @@ packages:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
     dependencies:
       '@types/node': 18.6.3
+    dev: true
+
+  /@types/sort-object-keys/1.1.0:
+    resolution: {integrity: sha512-lsWA+upBKOEdgl2Sw/yK+t4a8LIsojTpTlD2hTqe0VG99mjGonJouRO/X0wCtpv+8D7WdKbZrXTbeybjcgWtlw==}
     dev: true
 
   /@types/validate-npm-package-name/4.0.0:
