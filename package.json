@@ -51,7 +51,8 @@
   "files": [
     "cli.mjs",
     "dist",
-    "templates"
+    "templates",
+    "templates/.gitignore"
   ],
   "publishConfig": {
     "access": "public"
