@@ -4,7 +4,7 @@
   "homepage": "https://github.com/HiDeoo/create-app",
   "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "bin": "./cli.mjs",
   "type": "module",
   "scripts": {
