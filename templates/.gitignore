@@ -4,6 +4,9 @@
 .vercel
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 .vscode-test
 .vscode-test-web
 *.local
