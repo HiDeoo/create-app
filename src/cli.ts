@@ -38,7 +38,7 @@ async function run() {
       const npmToken = await promptForToken('Npm automation access token: (Enter nothing to skip)')
 
       if (npmToken.length > 0) {
-        options.npmToken
+        options.npmToken = npmToken
       }
     }
 
