@@ -3,7 +3,14 @@ import sortObjectKey from 'sort-object-keys'
 import { sortPackageJson } from 'sort-package-json'
 import { type TsConfigJson } from 'type-fest'
 
-export const PRESERVED_TS_COMPILER_OPTIONS = new Set(['allowJs', 'jsx', 'noEmit', 'target'])
+export const PRESERVED_TS_COMPILER_OPTIONS = new Set([
+  'allowJs',
+  'jsx',
+  'jsxFactory',
+  'jsxFragmentFactory',
+  'noEmit',
+  'target',
+])
 
 export function parseTsConfig(config: string): TsConfigJson {
   return JSON.parse(config)
