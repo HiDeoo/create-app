@@ -46,6 +46,18 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
+    appName: 'vite-preact-ts',
+    description: 'should update a private Vite app with Preact & TypeScript',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'vite-preact-ts',
+    description: 'should update a public Vite app with Preact & TypeScript',
+    options: { access: 'public', isNew: false, npmToken: 'token' },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
     appName: 'next-ts',
     description: 'should update a private Next.js app with TypeScript',
     options: { access: 'private', isNew: false },
@@ -257,6 +269,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(fileTsConfig.compilerOptions?.allowJs).toBe(fixtureTsConfig.compilerOptions?.allowJs)
     expect(fileTsConfig.compilerOptions?.jsx).toBe(fixtureTsConfig.compilerOptions?.jsx)
+    expect(fileTsConfig.compilerOptions?.jsxFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFactory)
+    expect(fileTsConfig.compilerOptions?.jsxFragmentFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFragmentFactory)
     expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
     expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
   })
