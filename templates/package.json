@@ -20,7 +20,7 @@
   "license": "MIT",
   "lint-staged": {
     "**/*": "prettier -w -u --cache",
-    "**/*.{js,jsx,ts,tsx,cjs,mjs}": "eslint --max-warnings=0"
+    "**/*.{js,jsx,ts,tsx,cjs,mjs}": "eslint --cache --max-warnings=0"
   },
   "name": "[[APP_NAME]]",
   "packageManager": "[[PACKAGE_MANAGER]]@[[PACKAGE_MANAGER_VERSION]]",
@@ -34,7 +34,7 @@
     "type": "git"
   },
   "scripts": {
-    "lint": "prettier -c . && eslint . --max-warnings=0 && tsc --noEmit",
+    "lint": "prettier -c . && eslint . --cache --max-warnings=0 && tsc --noEmit",
     "test": "echo \"Error: no test implemented.\" && exit 1",
     "prepare": "husky install",
     "prepublishOnly": "pnpm build"
