@@ -1,4 +1,5 @@
 .DS_Store
+.eslintcache
 *.tsbuildinfo
 dist
 node_modules
