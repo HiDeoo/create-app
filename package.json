@@ -11,7 +11,7 @@
     "dev": "unbuild --stub",
     "build": "unbuild",
     "test": "vitest",
-    "lint": "prettier -c . && eslint . --max-warnings=0 && tsc --noEmit",
+    "lint": "prettier -c . && eslint . --cache  --max-warnings=0 && tsc --noEmit",
     "prepare": "husky install",
     "prepublishOnly": "pnpm run build"
   },
@@ -77,6 +77,6 @@
   "prettier": "@hideoo/prettier-config",
   "lint-staged": {
     "**/*": "prettier -w -u --cache",
-    "!(fixtures/**/*)*.ts": "eslint --max-warnings=0"
+    "!(fixtures/**/*)*.ts": "eslint --cache  --max-warnings=0"
   }
 }
