@@ -8,6 +8,7 @@ export const PRESERVED_TS_COMPILER_OPTIONS = new Set([
   'jsx',
   'jsxFactory',
   'jsxFragmentFactory',
+  'jsxImportSource',
   'noEmit',
   'target',
 ])

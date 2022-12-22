@@ -271,6 +271,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(fileTsConfig.compilerOptions?.jsx).toBe(fixtureTsConfig.compilerOptions?.jsx)
     expect(fileTsConfig.compilerOptions?.jsxFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFactory)
     expect(fileTsConfig.compilerOptions?.jsxFragmentFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFragmentFactory)
+    expect(fileTsConfig.compilerOptions?.jsxImportSource).toBe(fixtureTsConfig.compilerOptions?.jsxImportSource)
     expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
     expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
   })
