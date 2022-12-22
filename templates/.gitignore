@@ -2,6 +2,7 @@
 .eslintcache
 .idea
 .next
+.turbo
 .vercel
 .vscode/*
 !.vscode/extensions.json
