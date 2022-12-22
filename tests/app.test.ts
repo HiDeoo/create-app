@@ -71,7 +71,7 @@ vi.mock('node:child_process', async () => {
   return {
     ...mod,
     spawn: vi.fn().mockReturnValue({
-      on: vi.fn().mockImplementation((event, listener) => {
+      on: vi.fn().mockImplementation((event: string, listener: (code: number | null) => void) => {
         if (event === 'close') {
           listener(0)
         }
@@ -139,7 +139,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
 
     assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
-    expectCompiledTemplate(templatePkg.engines?.['node'], filePkg.engines?.['node'], templateVariables)
+    expectCompiledTemplate(templatePkg.engines['node'], filePkg.engines['node'], templateVariables)
 
     assert(isString(templatePkg.homepage) && isString(filePkg.homepage))
     expectCompiledTemplate(templatePkg.homepage, filePkg.homepage, templateVariables)
@@ -175,7 +175,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
 
-    expect(filePkg.type).toBe(fixturePkg.type ? fixturePkg.type : fixturePkg.name ? undefined : templatePkg.type)
+    expect(filePkg.type).toBe(fixturePkg.type ?? (fixturePkg.name ? undefined : templatePkg.type))
 
     expect(filePkg.version).toBe(templatePkg.version)
   })
@@ -195,7 +195,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should install dependencies, optionally setup the npm automation access token, and prettify the app', async () => {
+  test('should install dependencies, optionally setup the npm automation access token, and prettify the app', () => {
     const spawnMock = vi.mocked(spawn)
 
     const hasNpmToken = options.npmToken && options.npmToken.length > 0
@@ -299,7 +299,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     const fileEsLintConfig = parseEsLintConfig(file)
     const fixtureEsLintConfig = parseEsLintConfig(fixture ?? '{}')
 
-    expect(Object.keys(fileEsLintConfig).length).toBe(1)
+    expect(Object.keys(fileEsLintConfig as Record<string, unknown>).length).toBe(1)
     expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
 
     if (fixtureEsLintConfig.extends) {
