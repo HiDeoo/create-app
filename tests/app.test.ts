@@ -195,56 +195,91 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should install dependencies, optionally setup the npm automation access token, and prettify the app', () => {
+  describe('should run various commands', () => {
     const spawnMock = vi.mocked(spawn)
 
-    const hasNpmToken = options.npmToken && options.npmToken.length > 0
-
-    expect(spawnMock).toHaveBeenCalledTimes((options.isNew ? 4 : 5) + (hasNpmToken ? 1 : 0))
+    afterAll(() => {
+      spawnMock.mockClear()
+    })
 
     let callIndex = 0
 
-    if (hasNpmToken) {
-      expect(spawnMock.mock.calls[0]?.[0]).toBe('gh')
-      expect(spawnMock.mock.calls[0]?.[1]).toEqual([
-        'secret',
-        'set',
-        'NPM_TOKEN',
-        '-R',
-        `${USER_NAME}/${appName}`,
-        '-b',
-        options.npmToken,
+    function expectSpawnToHaveBeenNthCalledWith(command: string, args: string[]) {
+      expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(command)
+      expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(args)
+
+      callIndex++
+    }
+
+    test('should run only necessary commands', () => {
+      expect(spawnMock).toHaveBeenCalledTimes(
+        6 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0)
+      )
+    })
+
+    test('should start by checking if a git repository is already initialized', () => {
+      expectSpawnToHaveBeenNthCalledWith('git', ['rev-parse', '--is-inside-work-tree'])
+    })
+
+    test('should setup the npm automation access token if needed', () => {
+      if (options.npmToken && options.npmToken.length > 0) {
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'secret',
+          'set',
+          'NPM_TOKEN',
+          '-R',
+          `${USER_NAME}/${appName}`,
+          '-b',
+          options.npmToken,
+        ])
+      }
+    })
+
+    test('should install dependencies', () => {
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['install'])
+    })
+
+    test('should configure Git hooks', () => {
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER_EXECUTE, [
+        'husky',
+        'add',
+        '.husky/pre-commit',
+        'pnpx lint-staged',
       ])
+    })
 
-      callIndex++
-    }
+    test('should run ESLint when updating an existing app', () => {
+      if (!options.isNew) {
+        expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'eslint', '.', '--fix'])
+      }
+    })
 
-    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe('git')
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['rev-parse', '--is-inside-work-tree'])
+    test('should prettify the app', () => {
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--loglevel', 'silent', '.'])
+    })
 
-    callIndex++
+    test('should check if the repository exists on GitHub', () => {
+      expectSpawnToHaveBeenNthCalledWith('gh', [
+        'api',
+        '-H',
+        'Accept: application/vnd.github+json',
+        `/repos/${USER_NAME}/${appName}`,
+      ])
+    })
 
-    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['install'])
-
-    callIndex++
-
-    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER_EXECUTE)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'])
-
-    callIndex++
-
-    if (!options.isNew) {
-      expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-      expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'eslint', '.', '--fix'])
-
-      callIndex++
-    }
-
-    expect(spawnMock.mock.calls[callIndex]?.[0]).toBe(PACKAGE_MANAGER)
-    expect(spawnMock.mock.calls[callIndex]?.[1]).toEqual(['exec', 'prettier', '-w', '--loglevel', 'silent', '.'])
-
-    spawnMock.mockClear()
+    test('should update the GitHub repository settings', () => {
+      expectSpawnToHaveBeenNthCalledWith('gh', [
+        'api',
+        '--method',
+        'PATCH',
+        '-H',
+        'Accept: application/vnd.github+json',
+        `/repos/${USER_NAME}/${appName}`,
+        '-F',
+        'delete_branch_on_merge=true',
+        '--silent',
+      ])
+    })
   })
 
   test('should add or update the tsconfig.json file', async () => {
