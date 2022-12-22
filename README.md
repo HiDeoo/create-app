@@ -54,6 +54,7 @@ And that's it, no options, no configuration and no extra tweaks needed, you are 
 - Git
   - Initialize a new Git repository if needed
   - Setup a pre-commit hook to run Prettier on all staged files and ESLint on supported staged files
+  - If a repository matching the name of the app exists on GitHub, enable the GitHub repository setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
 - GitHub Actions
   - Create an integration workflow to lint, ensure formatting, typecheck and test the project for every push on the main branch or pull request
   - Optionally, if the app is meant to be published on the npm registry, a workflow to trigger a new release will be added

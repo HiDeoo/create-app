@@ -4,7 +4,12 @@ import path from 'node:path'
 import { USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { initGitRepository, isGitRepository } from './libs/git'
-import { addRepositorySecret } from './libs/github'
+import {
+  addRepositorySecret,
+  isGitHubRepository,
+  type RepositoryIdentifier,
+  updateRepositorySetting,
+} from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
@@ -26,6 +31,8 @@ export async function createApp(appName: string, appPath: string, options: AppOp
 }
 
 async function bootstrapApp(appName: string, appPath: string, options: AppOptions) {
+  await setupGitRepository(appPath)
+
   await copyTemplates(appName, appPath)
   await copyPkg(appName, appPath, options.access)
   await copyTsConfig(appPath)
@@ -35,10 +42,22 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
     await setupReleaseWorkflow(appName, appPath, options.npmToken)
   }
 
-  await setupGitRepository(appPath)
   await install(appPath)
+
   await addGitHooks(appPath)
   await prettify(appPath, options.isNew)
+
+  await updateGitHubRepositorySettings(appName)
+}
+
+async function setupGitRepository(appPath: string) {
+  const isGitRepo = await isGitRepository(appPath)
+
+  if (!isGitRepo) {
+    logStepWithProgress('Baking Git repository…')
+
+    await initGitRepository(appPath)
+  }
 }
 
 async function copyTemplates(appName: string, appPath: string) {
@@ -131,16 +150,6 @@ async function install(appPath: string) {
   await installDependencies(appPath)
 }
 
-async function setupGitRepository(appPath: string) {
-  const isGitRepo = await isGitRepository(appPath)
-
-  if (!isGitRepo) {
-    logStepWithProgress('Baking Git repository…')
-
-    await initGitRepository(appPath)
-  }
-}
-
 async function addGitHooks(appPath: string) {
   logStepWithProgress('Configuring Git hooks…', true)
 
@@ -155,6 +164,20 @@ async function prettify(appPath: string, isNew: boolean) {
   }
 
   return runPackageManagerCommand(appPath, ['prettier', '-w', '--loglevel', 'silent', '.'])
+}
+
+async function updateGitHubRepositorySettings(appName: string) {
+  const repoIdentifier = `${USER_NAME}/${appName}` satisfies RepositoryIdentifier
+
+  const shouldUpdateSettings = await isGitHubRepository(repoIdentifier)
+
+  if (!shouldUpdateSettings) {
+    return
+  }
+
+  logStepWithProgress('Updating GitHub repository settings…')
+
+  await updateRepositorySetting(repoIdentifier, 'delete_branch_on_merge', true)
 }
 
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
