@@ -45,7 +45,7 @@ export function logError(error: unknown) {
   }
 
   const isError = error instanceof Error
-  console.error(`\nSomething went wrong: ${isError ? error.message : error}`)
+  console.error('\nSomething went wrong:', isError ? error.message : error)
 
   if (isError && error.cause) {
     console.error(error.cause)
@@ -58,7 +58,7 @@ export async function promptForName(): Promise<string> {
     name: 'name',
     onState: onPromptStateChange,
     type: 'text',
-    validate: (value) =>
+    validate: (value: string) =>
       isValidPkgName(value) ||
       'Invalid app name, please check https://docs.npmjs.com/cli/v8/configuring-npm/package-json#name',
   })

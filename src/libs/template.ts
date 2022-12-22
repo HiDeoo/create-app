@@ -56,7 +56,7 @@ export function getTemplateContent(templatePath: string) {
 export async function compileTemplate(appName: string, content: string) {
   const templateVariables = await getTemplateVariables(appName)
 
-  const compiledContent = content.replaceAll(/\[\[(\w+)]]/g, (_match, variable) => {
+  const compiledContent = content.replaceAll(/\[\[(\w+)]]/g, (_match, variable: string) => {
     if (!isValidTemplateVariable(variable)) {
       throw new Error(`Invalid template variable '${variable}'`)
     }
@@ -70,7 +70,7 @@ export async function compileTemplate(appName: string, content: string) {
 function getTemplatesPath() {
   const dirName = path.dirname(fileURLToPath(import.meta.url))
 
-  return path.join(dirName, /src\/libs$/.test(dirName) ? '../..' : '..', 'templates')
+  return path.join(dirName, dirName.endsWith('src/libs') ? '../..' : '..', 'templates')
 }
 
 function isValidTemplateVariable(variable: string): variable is keyof TemplateVariables {
