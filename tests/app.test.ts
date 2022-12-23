@@ -217,7 +217,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     test('should run only necessary commands', () => {
       expect(spawnMock).toHaveBeenCalledTimes(
-        6 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0)
+        7 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0)
       )
     })
 
@@ -283,6 +283,23 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
           options.npmToken,
         ])
       }
+    })
+
+    test('should stage new or updated files', () => {
+      expectSpawnToHaveBeenNthCalledWith('git', [
+        'add',
+        '.eslintrc.json',
+        '.github/workflows/integration.yml',
+        '.github/workflows/release.yml',
+        '.gitignore',
+        '.prettierignore',
+        'LICENSE',
+        'README.md',
+        'package.json',
+        'tsconfig.json',
+        '.husky/pre-commit',
+        'pnpm-lock.yaml',
+      ])
     })
   })
 
