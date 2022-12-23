@@ -1,3 +1,4 @@
 dist
 fixtures
 pnpm-lock.yaml
+templates/.github/workflows/release.yml

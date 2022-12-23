@@ -74,9 +74,5 @@
     "url": "https://github.com/HiDeoo/create-app.git",
     "type": "git"
   },
-  "prettier": "@hideoo/prettier-config",
-  "lint-staged": {
-    "**/*": "prettier -w -u --cache",
-    "!(fixtures/**/*)*.ts": "eslint --cache  --max-warnings=0"
-  }
+  "prettier": "@hideoo/prettier-config"
 }

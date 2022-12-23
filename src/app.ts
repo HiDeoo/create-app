@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { USER_NAME } from './config'
+import { NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { initGitRepository, isGitRepository } from './libs/git'
 import {
@@ -13,7 +13,14 @@ import {
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
-import { compileTemplate, getTemplateContent, getTemplatePath, getTemplatePaths } from './libs/template'
+import {
+  compileTemplate,
+  getTemplateContent,
+  getTemplatePath,
+  getTemplatePaths,
+  setTemplateVariables,
+  type UserDefinedTemplateVariables,
+} from './libs/template'
 import { mergeTsConfigs, parseTsConfig, sortTsConfig } from './libs/typescript'
 
 export async function updateApp(appName: string, appPath: string, options: AppOptions) {
@@ -33,14 +40,10 @@ export async function createApp(appName: string, appPath: string, options: AppOp
 async function bootstrapApp(appName: string, appPath: string, options: AppOptions) {
   await setupGitRepository(appPath)
 
-  await copyTemplates(appName, appPath)
-  await copyPkg(appName, appPath, options.access)
+  await copyTemplates(appName, appPath, options.access)
+  await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
   await copyEsLintConfig(appPath)
-
-  if (options.access === 'public') {
-    await setupReleaseWorkflow(appName, appPath, options.npmToken)
-  }
 
   await install(appPath)
 
@@ -48,6 +51,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await prettify(appPath, options.isNew)
 
   await updateGitHubRepositorySettings(appName)
+  await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
 }
 
 async function setupGitRepository(appPath: string) {
@@ -60,22 +64,24 @@ async function setupGitRepository(appPath: string) {
   }
 }
 
-async function copyTemplates(appName: string, appPath: string) {
+async function copyTemplates(appName: string, appPath: string, access: AppOptions['access']) {
   logStepWithProgress('Copying templates…')
+
+  setTemplateVariables(getUserDefinedTemplateVariables(appName, access))
 
   const templatePaths = await getTemplatePaths()
 
   return Promise.all(
     templatePaths.map(async ({ destination, source }) => {
       const templateContent = await getTemplateContent(source)
-      const compiledTemplate = await compileTemplate(appName, templateContent)
+      const compiledTemplate = await compileTemplate(templateContent)
 
       return writeAppFile(appPath, destination, compiledTemplate)
     })
   )
 }
 
-async function copyPkg(appName: string, appPath: string, access: AppOptions['access']) {
+async function copyPkg(appPath: string, access: AppOptions['access']) {
   const fileName = 'package.json'
 
   logStepWithProgress(`Brewing ${fileName}…`)
@@ -91,7 +97,7 @@ async function copyPkg(appName: string, appPath: string, access: AppOptions['acc
   pkg = setPkgAccess(pkg, access)
   pkg = sortPkg(pkg)
 
-  const compiledPkg = await compileTemplate(appName, JSON.stringify(pkg, null, 2))
+  const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2))
 
   return writeAppFile(appPath, fileName, compiledPkg)
 }
@@ -127,21 +133,6 @@ async function copyEsLintConfig(appPath: string) {
   const esLintConfig = mergeEsLintConfigs(existingEsLintConfig, templateEsLintConfig)
 
   return writeAppJsonFile(appPath, fileName, esLintConfig)
-}
-
-async function setupReleaseWorkflow(appName: string, appPath: string, npmToken: AppOptions['npmToken']) {
-  const fileName = '.github/workflows/release.yml'
-
-  logStepWithProgress('Configuring release workflow…')
-
-  const template = await getTemplateContent(getTemplatePath(fileName))
-  const compiledTemplate = await compileTemplate(appPath, template)
-
-  await writeAppFile(appPath, fileName, compiledTemplate)
-
-  if (npmToken && npmToken.length > 0) {
-    await addRepositorySecret(`${USER_NAME}/${appName}`, 'NPM_TOKEN', npmToken)
-  }
 }
 
 async function install(appPath: string) {
@@ -180,6 +171,20 @@ async function updateGitHubRepositorySettings(appName: string) {
   await updateRepositorySetting(repoIdentifier, 'delete_branch_on_merge', true)
 }
 
+async function addGitHubRepositorySecrets(
+  appName: string,
+  access: AppOptions['access'],
+  npmToken: AppOptions['npmToken']
+) {
+  if (access !== 'public' || !npmToken || npmToken.length === 0) {
+    return
+  }
+
+  logStepWithProgress('Adding GitHub repository secrets…')
+
+  await addRepositorySecret(`${USER_NAME}/${appName}`, 'NPM_TOKEN', npmToken)
+}
+
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
   try {
     return await fs.readFile(path.join(appPath, filePath), { encoding: 'utf8' })
@@ -202,6 +207,14 @@ function writeAppJsonFile(appPath: string, filePath: string, data: unknown) {
 
 function ensureDirectory(dirPath: string) {
   return fs.mkdir(dirPath, { recursive: true })
+}
+
+function getUserDefinedTemplateVariables(appName: string, access: AppOptions['access']): UserDefinedTemplateVariables {
+  return {
+    APP_NAME: appName,
+    RELEASE_REGISTRY_URL: access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
+    RELEASE_STEP: access === 'public' ? NPM_RELEASE_STEP : '',
+  }
 }
 
 export interface AppOptions {

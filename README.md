@@ -57,11 +57,10 @@ And that's it, no options, no configuration and no extra tweaks needed, you are 
   - If a repository matching the name of the app exists on GitHub, enable the GitHub repository setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
 - GitHub Actions
   - Create an integration workflow to lint, ensure formatting, typecheck and test the project for every push on the main branch or pull request
-  - Optionally, if the app is meant to be published on the npm registry, a workflow to trigger a new release will be added
-    - The webpage to create a new npm automation access token will automatically be opened during the installation in order to automatically add the new token as a repository secret using the GitHub CLI to the repository matching the name of the app
-    - To trigger a new release, bump the version number in a commit with a tag matching the new version number (or just run `pnpx bumpp`)
+  - Add a customizable release workflow that can be triggered by bumping the version number in a commit with a tag matching the new version number (or just running `pnpx bumpp`)
     - The release workflow will fail if the integration workflow fails
     - A new release containing the changelog will be published on GitHub based on [conventional commits](https://www.conventionalcommits.org)
+    - Optionally, if the app is a public npm package, a webpage to create a new npm automation access token will be opened during the installation in order to automatically add the new token as a secret to the repository matching the name of the app on GitHub if it exists. The release workflow will also be modified to publish the package to the npm registry.
 
 ## License
 
