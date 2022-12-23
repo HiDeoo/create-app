@@ -7,6 +7,12 @@ export const NODE_VERSION = 18
 export const PACKAGE_MANAGER = 'pnpm'
 export const PACKAGE_MANAGER_EXECUTE = 'pnpx'
 
+export const NPM_REGISTRY_URL = 'https://registry.npmjs.org'
+export const NPM_RELEASE_STEP = `- name: Publish
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}`
+
 export const PKG_KEYS_ORDER = [
   '$schema',
   'name',

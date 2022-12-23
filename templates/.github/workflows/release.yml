@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: [[NODE_VERSION]]
-          registry-url: 'https://registry.npmjs.org'
+          [[RELEASE_REGISTRY_URL]]
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2.2.4
@@ -50,10 +50,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Publish
-        run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      [[RELEASE_STEP]]
 
       - name: Generate changelog
         run: pnpx changelogithub

@@ -27,7 +27,7 @@ async function run() {
     }
 
     options.access = (await promptForYesNo(
-      'Public app? (if public, a page to create an automation access token will automatically be opened)'
+      'Public npm package? (if public, a page to create an npm automation access token will be opened)'
     ))
       ? 'public'
       : 'private'
