@@ -6,6 +6,8 @@ import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 import { type AppOptions, createApp, updateApp } from '../src/app'
 import {
   NODE_VERSION,
+  NPM_REGISTRY_URL,
+  NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
   PACKAGE_MANAGER_EXECUTE,
   PKG_KEYS_ORDER,
@@ -93,6 +95,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
+      RELEASE_REGISTRY_URL: options.access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
+      RELEASE_STEP: options.access === 'public' ? NPM_RELEASE_STEP : '',
       USER_NAME,
       USER_MAIL,
       USER_SITE,
@@ -221,20 +225,6 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       expectSpawnToHaveBeenNthCalledWith('git', ['rev-parse', '--is-inside-work-tree'])
     })
 
-    test('should setup the npm automation access token if needed', () => {
-      if (options.npmToken && options.npmToken.length > 0) {
-        expectSpawnToHaveBeenNthCalledWith('gh', [
-          'secret',
-          'set',
-          'NPM_TOKEN',
-          '-R',
-          `${USER_NAME}/${appName}`,
-          '-b',
-          options.npmToken,
-        ])
-      }
-    })
-
     test('should install dependencies', () => {
       expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['install'])
     })
@@ -279,6 +269,20 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         'delete_branch_on_merge=true',
         '--silent',
       ])
+    })
+
+    test('should setup the npm automation access token if needed', () => {
+      if (options.npmToken && options.npmToken.length > 0) {
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'secret',
+          'set',
+          'NPM_TOKEN',
+          '-R',
+          `${USER_NAME}/${appName}`,
+          '-b',
+          options.npmToken,
+        ])
+      }
     })
   })
 
@@ -361,18 +365,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should only add the release workflow to public app', async () => {
-    const fileName = '.github/workflows/release.yml'
+  test('should add the release workflow', async () => {
+    const { file, template } = await getTestContent(testDir, appName, '.github/workflows/release.yml')
 
-    if (options.access === 'private') {
-      const testDirPaths = await getTestDirPaths(testDir)
-
-      expect(testDirPaths).not.toContain(`/${fileName}`)
-    } else {
-      const { file, template } = await getTestContent(testDir, appName, fileName)
-
-      expectCompiledTemplate(template, file, templateVariables)
-    }
+    expectCompiledTemplate(template, file, templateVariables)
   })
 })
 
@@ -396,12 +392,23 @@ function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?:
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {
   expect(
-    template.replaceAll(/\[\[(\w+)]]/g, (_match, variable: keyof TemplateVariables) => {
-      if (!variables) {
-        throw new Error('No template variables provided.')
-      }
-      return variables[variable].toString()
-    })
+    template
+      .replaceAll(/\[\[(\w+)]]/g, (_match, variable: keyof TemplateVariables) => {
+        if (!variables) {
+          throw new Error('No template variables provided.')
+        }
+
+        return variables[variable].toString()
+      })
+      .replaceAll(/(\n\s+)\(\((\w+)\)\)/g, (_match, spacing: string, variable: keyof TemplateVariables) => {
+        if (!variables) {
+          throw new Error('No template variables provided.')
+        }
+
+        const value = variables[variable].toString()
+
+        return value.length === 0 ? '' : `${spacing}${value}`
+      })
   ).toBe(content)
 }
 

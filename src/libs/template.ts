@@ -9,18 +9,28 @@ import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '
 import { getPkgManagerLatestVersion } from './pm'
 
 // A set of templates which will not be automatically processed and requires special handling.
-const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json', '.github/workflows/release.yml'])
+const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json'])
 
-const templateVariables = [
+const templateVariableKeys = [
   'APP_NAME',
   'PACKAGE_MANAGER',
   'PACKAGE_MANAGER_VERSION',
   'NODE_VERSION',
+  'RELEASE_REGISTRY_URL',
+  'RELEASE_STEP',
   'USER_MAIL',
   'USER_NAME',
   'USER_SITE',
   'YEAR',
-] as const
+] as const satisfies readonly TemplateVariableKey[]
+
+const userDefinedTemplateVariableKeys = [
+  'APP_NAME',
+  'RELEASE_REGISTRY_URL',
+  'RELEASE_STEP',
+] as const satisfies readonly typeof templateVariableKeys[number][]
+
+let userDefinedTemplateVariables: UserDefinedTemplateVariables | undefined
 
 export async function getTemplatePaths() {
   const templatePath = getTemplatesPath()
@@ -53,16 +63,28 @@ export function getTemplateContent(templatePath: string) {
   return fs.readFile(templatePath, { encoding: 'utf8' })
 }
 
-export async function compileTemplate(appName: string, content: string) {
-  const templateVariables = await getTemplateVariables(appName)
+export function setTemplateVariables(variables: UserDefinedTemplateVariables) {
+  userDefinedTemplateVariables = variables
+}
 
-  const compiledContent = content.replaceAll(/\[\[(\w+)]]/g, (_match, variable: string) => {
-    if (!isValidTemplateVariable(variable)) {
-      throw new Error(`Invalid template variable '${variable}'`)
+export async function compileTemplate(content: string) {
+  const templateVariables = await getTemplateVariables()
+
+  const compiledContent = content.replaceAll(
+    /(?:\[\[(\w+)]])|(?:(\n\s+)\(\((\w+)\)\))/g,
+    (_match, variable: string, conditionalSpacing?: string, conditionalVariable?: string) => {
+      const isConditional = conditionalSpacing !== undefined && conditionalVariable !== undefined
+      const variableName = isConditional ? conditionalVariable : variable
+
+      if (!isValidTemplateVariable(variableName)) {
+        throw new Error(`Invalid template variable '${variableName}'`)
+      }
+
+      const value = templateVariables[variableName].toString()
+
+      return isConditional ? (value.length === 0 ? '' : `${conditionalSpacing}${value}`) : value
     }
-
-    return templateVariables[variable].toString()
-  })
+  )
 
   return compiledContent
 }
@@ -74,10 +96,16 @@ function getTemplatesPath() {
 }
 
 function isValidTemplateVariable(variable: string): variable is keyof TemplateVariables {
-  return templateVariables.includes(variable as typeof templateVariables[number])
+  return templateVariableKeys.includes(variable as typeof templateVariableKeys[number])
 }
 
-async function getTemplateVariables(appName: string): Promise<TemplateVariables> {
+async function getTemplateVariables(): Promise<TemplateVariables> {
+  if (!userDefinedTemplateVariables) {
+    throw new Error(
+      'User defined template variables are not defined, you probably forget to call `setTemplateVariables()`.'
+    )
+  }
+
   const latestPmVersion = await getPkgManagerLatestVersion()
 
   if (!latestPmVersion) {
@@ -85,10 +113,12 @@ async function getTemplateVariables(appName: string): Promise<TemplateVariables>
   }
 
   return {
-    APP_NAME: appName,
+    APP_NAME: userDefinedTemplateVariables.APP_NAME,
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
+    RELEASE_REGISTRY_URL: userDefinedTemplateVariables.RELEASE_REGISTRY_URL,
+    RELEASE_STEP: userDefinedTemplateVariables.RELEASE_STEP,
     USER_NAME,
     USER_MAIL,
     USER_SITE,
@@ -102,5 +132,12 @@ interface Template {
 }
 
 export type TemplateVariables = {
-  [key in typeof templateVariables[number]]: string | number
+  [key in typeof templateVariableKeys[number]]: TemplateVariableValue
 }
+
+export type UserDefinedTemplateVariables = {
+  [key in typeof userDefinedTemplateVariableKeys[number]]: TemplateVariableValue
+}
+
+type TemplateVariableKey = string
+type TemplateVariableValue = string | number
