@@ -32,7 +32,7 @@ const userDefinedTemplateVariableKeys = [
 
 let userDefinedTemplateVariables: UserDefinedTemplateVariables | undefined
 
-export async function getTemplatePaths() {
+export async function getTemplatePaths(ignoreSpecialTemplates = true) {
   const templatePath = getTemplatesPath()
 
   const allTemplatePaths = await glob(path.join(templatePath, '**/*'), { absolute: true, dot: true, filesOnly: true })
@@ -45,7 +45,7 @@ export async function getTemplatePaths() {
       source: absolutePath,
     }
 
-    if (specialTemplates.has(template.destination)) {
+    if (ignoreSpecialTemplates && specialTemplates.has(template.destination)) {
       continue
     }
 

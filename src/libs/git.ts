@@ -13,3 +13,7 @@ export async function isGitRepository(repoPath: string) {
 export function initGitRepository(repoPath: string) {
   return exec('git', ['init'], { cwd: repoPath, silent: true })
 }
+
+export function stageFiles(repoPath: string, files: string[]) {
+  return exec('git', ['add', ...files], { cwd: repoPath, silent: true })
+}

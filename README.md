@@ -40,7 +40,7 @@ And that's it, no options, no configuration and no extra tweaks needed, you are 
   - TypeScript with a configuration extending [@hideoo/tsconfig](https://github.com/HiDeoo/tsconfig)
   - ESLint with a configuration extending [@hideoo/eslint-config](https://github.com/HiDeoo/eslint-config)
   - Prettier with a configuration extending [@hideoo/prettier-config](https://github.com/HiDeoo/prettier-config) and a pre-filled `.prettierignore` file
-- Automatically install all dependencies using pnpm
+- Automatically install all dependencies using `pnpm`
 - Automatically run Prettier and ESLint with the `--fix` option on all files (this is particularly useful when updating an existing project to ensure all files match the proper code style)
 - Setup the `package.json` file:
   - Pre-fill most common fields
@@ -55,6 +55,7 @@ And that's it, no options, no configuration and no extra tweaks needed, you are 
   - Initialize a new Git repository if needed
   - Setup a pre-commit hook to run Prettier on all staged files and ESLint on supported staged files
   - If a repository matching the name of the app exists on GitHub, enable the GitHub repository setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
+  - Stage _added_ or _updated_ files during the creation of the app at the end of the process
 - GitHub Actions
   - Create an integration workflow to lint, ensure formatting, typecheck and test the project for every push on the main branch or pull request
   - Add a customizable release workflow that can be triggered by bumping the version number in a commit with a tag matching the new version number (or just running `pnpx bumpp`)

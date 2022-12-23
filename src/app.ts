@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
-import { initGitRepository, isGitRepository } from './libs/git'
+import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
   addRepositorySecret,
   isGitHubRepository,
@@ -52,6 +52,8 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
 
   await updateGitHubRepositorySettings(appName)
   await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
+
+  await stageBootstrapFiles(appPath)
 }
 
 async function setupGitRepository(appPath: string) {
@@ -215,6 +217,17 @@ function getUserDefinedTemplateVariables(appName: string, access: AppOptions['ac
     RELEASE_REGISTRY_URL: access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
     RELEASE_STEP: access === 'public' ? NPM_RELEASE_STEP : '',
   }
+}
+
+async function stageBootstrapFiles(appPath: string) {
+  logStepWithProgress('Tying up a few loose ends…')
+
+  const templatePaths = await getTemplatePaths(false)
+
+  const filesToStage = templatePaths.map(({ destination }) => destination)
+  filesToStage.push('.husky/pre-commit', 'pnpm-lock.yaml')
+
+  await stageFiles(appPath, filesToStage)
 }
 
 export interface AppOptions {
