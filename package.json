@@ -11,7 +11,7 @@
     "dev": "unbuild --stub",
     "build": "unbuild",
     "test": "vitest",
-    "lint": "prettier -c . && eslint . --cache  --max-warnings=0 && tsc --noEmit",
+    "lint": "prettier -c --cache . && eslint . --cache  --max-warnings=0 && tsc --noEmit",
     "prepare": "husky install",
     "prepublishOnly": "pnpm run build"
   },

@@ -34,7 +34,7 @@
     "type": "git"
   },
   "scripts": {
-    "lint": "prettier -c . && eslint . --cache --max-warnings=0 && tsc --noEmit",
+    "lint": "prettier -c --cache . && eslint . --cache --max-warnings=0 && tsc --noEmit",
     "test": "echo \"Error: no test implemented.\" && exit 1",
     "prepare": "husky install",
     "prepublishOnly": "pnpm build"
