@@ -49,16 +49,19 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
   return mergedPkg
 }
 
-export async function pinPkgDependenciesToLatest(pkg: PackageJson) {
+export async function pinPkgDependenciesToLatest(pkg: PackageJson, onPin: (name: string) => void) {
   if (pkg.dependencies) {
-    pkg.dependencies = await pinDependenciesToLatest(pkg.dependencies)
+    pkg.dependencies = await pinDependenciesToLatest(pkg.dependencies, onPin)
   }
 
   if (pkg.devDependencies) {
-    pkg.devDependencies = await pinDependenciesToLatest(pkg.devDependencies)
+    pkg.devDependencies = await pinDependenciesToLatest(pkg.devDependencies, onPin)
 
     if (dependenciesContains(pkg.devDependencies, '@types/node')) {
-      pkg.devDependencies['@types/node'] = await getPkgLatestVersion(`@types/node@${NODE_VERSION}`)
+      const pkgName = `@types/node@${NODE_VERSION}`
+
+      onPin(pkgName)
+      pkg.devDependencies['@types/node'] = await getPkgLatestVersion(pkgName)
     }
   }
 
@@ -80,10 +83,12 @@ export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
   return pkg
 }
 
-async function pinDependenciesToLatest(dependencies: PackageJson.Dependency) {
+async function pinDependenciesToLatest(dependencies: PackageJson.Dependency, onPin: (name: string) => void) {
   const deps: PackageJson.Dependency = {}
 
   for (const name of Object.keys(dependencies)) {
+    onPin(name)
+
     deps[name] = await getPkgLatestVersion(name)
   }
 

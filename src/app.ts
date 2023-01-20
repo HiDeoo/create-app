@@ -86,7 +86,7 @@ async function copyTemplates(appName: string, appPath: string, access: AppOption
 async function copyPkg(appPath: string, access: AppOptions['access']) {
   const fileName = 'package.json'
 
-  logStepWithProgress(`Brewing ${fileName}…`)
+  const { addDetails, removeDetails } = logStepWithProgress(`Brewing ${fileName}…`)
 
   const template = await getTemplateContent(getTemplatePath(fileName))
   const existing = (await readAppFile(appPath, fileName)) ?? '{}'
@@ -95,13 +95,17 @@ async function copyPkg(appPath: string, access: AppOptions['access']) {
   const existingPkg = parsePkg(existing)
 
   let pkg = mergePkgs(existingPkg, templatePkg)
-  pkg = await pinPkgDependenciesToLatest(pkg)
+  pkg = await pinPkgDependenciesToLatest(pkg, (name) => {
+    addDetails(name)
+  })
   pkg = setPkgAccess(pkg, access)
   pkg = sortPkg(pkg)
 
   const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2))
 
-  return writeAppFile(appPath, fileName, compiledPkg)
+  await writeAppFile(appPath, fileName, compiledPkg)
+
+  removeDetails()
 }
 
 async function copyTsConfig(appPath: string) {
