@@ -17,16 +17,21 @@ export function logStep(message: string) {
   console.log(`${green('✔')} ${bold(message)}`)
 }
 
-export function logStepWithProgress(message: string, prependNewLine = false) {
+export function logStepWithProgress(message: string): StepWithProgress {
   if (spinner.isSpinning) {
     spinner.succeed()
   }
 
-  if (prependNewLine) {
-    console.log('\n')
-  }
+  spinner.start(bold(message))
 
-  return spinner.start(bold(message))
+  return {
+    addDetails(details) {
+      spinner.text = `${bold(message)} › ${details}`
+    },
+    removeDetails() {
+      spinner.text = bold(message)
+    },
+  }
 }
 
 export function logError(error: unknown) {
@@ -128,4 +133,9 @@ function onPromptStateChange(state: PromptState) {
 interface PromptState {
   aborted: boolean
   value: string
+}
+
+interface StepWithProgress {
+  addDetails: (detail: string) => void
+  removeDetails: () => void
 }

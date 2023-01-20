@@ -3,7 +3,6 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { type Ora } from 'ora'
 import glob from 'tiny-glob'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
@@ -18,7 +17,9 @@ export function setupTest(testName: string) {
 
   const logStepSpy = vi.spyOn(prompt, 'logStep').mockReturnValue()
   const confirmationPromptSpy = vi.spyOn(prompt, 'promptForConfirmation').mockResolvedValue()
-  const logStepWithProgressSpy = vi.spyOn(prompt, 'logStepWithProgress').mockResolvedValue({} as Ora)
+  const logStepWithProgressSpy = vi
+    .spyOn(prompt, 'logStepWithProgress')
+    .mockReturnValue({ addDetails: vi.fn(), removeDetails: vi.fn() })
 
   async function beforeTest() {
     vi.useFakeTimers()

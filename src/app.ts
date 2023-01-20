@@ -12,7 +12,7 @@ import {
 } from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
-import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
+import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import {
   compileTemplate,
   getTemplateContent,
@@ -138,13 +138,17 @@ async function copyEsLintConfig(appPath: string) {
 }
 
 async function install(appPath: string) {
-  logStep('Preparing dependencies…\n')
+  const { addDetails, removeDetails } = logStepWithProgress('Installing dependencies…')
 
-  await installDependencies(appPath)
+  await installDependencies(appPath, (data) => {
+    addDetails(data)
+  })
+
+  removeDetails()
 }
 
 async function addGitHooks(appPath: string) {
-  logStepWithProgress('Configuring Git hooks…', true)
+  logStepWithProgress('Configuring Git hooks…')
 
   return executePackageManagerCommand(appPath, ['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'], true)
 }

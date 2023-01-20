@@ -7,8 +7,15 @@ export function getPkgManagerLatestVersion() {
   return getPkgLatestVersion(PACKAGE_MANAGER)
 }
 
-export function installDependencies(appPath: string) {
-  return runPackageManager(appPath, ['install'], { env: { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' } })
+export function installDependencies(appPath: string, onStdout: NonNullable<ExecOptions['onStdout']>) {
+  return runPackageManager(appPath, ['install'], {
+    env: { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' },
+    onStdout: (data) => {
+      if (!data.includes('+++++')) {
+        onStdout(data.replace(/\s{2,}/g, ''))
+      }
+    },
+  })
 }
 
 export function runPackageManagerCommand(appPath: string, args: string[], silent?: boolean) {
