@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { green, reset } from 'kolorist'
+import { bold, green, red } from 'kolorist'
 import ora from 'ora'
 import prompts from 'prompts'
 
@@ -14,19 +14,24 @@ export function logStep(message: string) {
     spinner.succeed()
   }
 
-  console.log(`${green('✔')} ${message}`)
+  console.log(`${green('✔')} ${bold(message)}`)
 }
 
-export function logStepWithProgress(message: string, prependNewLine = false) {
+export function logStepWithProgress(message: string): StepWithProgress {
   if (spinner.isSpinning) {
     spinner.succeed()
   }
 
-  if (prependNewLine) {
-    console.log('\n')
-  }
+  spinner.start(bold(message))
 
-  return spinner.start(message)
+  return {
+    addDetails(details) {
+      spinner.text = `${bold(message)} › ${details}`
+    },
+    removeDetails() {
+      spinner.text = bold(message)
+    },
+  }
 }
 
 export function logError(error: unknown) {
@@ -45,7 +50,7 @@ export function logError(error: unknown) {
   }
 
   const isError = error instanceof Error
-  console.error('\nSomething went wrong:', isError ? error.message : error)
+  console.error(bold(red('\nSomething went wrong:')), isError ? error.message : error)
 
   if (isError && error.cause) {
     console.error(error.cause)
@@ -54,7 +59,7 @@ export function logError(error: unknown) {
 
 export async function promptForName(): Promise<string> {
   const { name } = await prompts({
-    message: reset('App name:'),
+    message: 'App name:',
     name: 'name',
     onState: onPromptStateChange,
     type: 'text',
@@ -70,7 +75,7 @@ export async function promptForDirectory(name: string): Promise<string> {
   const { newDirectory } = await prompts({
     active: `new '${name}' directory`,
     inactive: 'current directory',
-    message: reset('App directory:'),
+    message: 'App directory:',
     name: 'newDirectory',
     onState: onPromptStateChange,
     type: 'toggle',
@@ -83,7 +88,7 @@ export async function promptForYesNo(message: string): Promise<boolean> {
   const { response } = await prompts({
     active: 'no',
     inactive: 'yes',
-    message: reset(message),
+    message: message,
     name: 'response',
     onState: onPromptStateChange,
     type: 'toggle',
@@ -95,7 +100,7 @@ export async function promptForYesNo(message: string): Promise<boolean> {
 export async function promptForConfirmation(message: string): Promise<void> {
   const { confirmed } = await prompts({
     initial: true,
-    message: reset(message),
+    message: message,
     name: 'confirmed',
     onState: onPromptStateChange,
     type: 'confirm',
@@ -108,7 +113,7 @@ export async function promptForConfirmation(message: string): Promise<void> {
 
 export async function promptForToken(message: string): Promise<string> {
   const { token } = await prompts({
-    message: reset(message),
+    message: message,
     name: 'token',
     onState: onPromptStateChange,
     type: 'password',
@@ -128,4 +133,9 @@ function onPromptStateChange(state: PromptState) {
 interface PromptState {
   aborted: boolean
   value: string
+}
+
+interface StepWithProgress {
+  addDetails: (detail: string) => void
+  removeDetails: () => void
 }

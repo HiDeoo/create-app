@@ -1,4 +1,4 @@
-import { green } from 'kolorist'
+import { green, reset } from 'kolorist'
 
 import { type AppOptions, createApp, updateApp } from './app'
 import { openNewNpmTokenPage } from './libs/npm'
@@ -27,7 +27,7 @@ async function run() {
     }
 
     options.access = (await promptForYesNo(
-      'Public npm package? (if public, a page to create an npm automation access token will be opened)'
+      `Public npm package? ${reset('(if public, a page to create an npm automation access token will be opened)')}`
     ))
       ? 'public'
       : 'private'
@@ -35,7 +35,7 @@ async function run() {
     if (options.access === 'public') {
       openNewNpmTokenPage()
 
-      const npmToken = await promptForToken('Npm automation access token: (Enter nothing to skip)')
+      const npmToken = await promptForToken(`Npm automation access token: ${reset('(Enter nothing to skip)')}`)
 
       if (npmToken.length > 0) {
         options.npmToken = npmToken

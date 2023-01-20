@@ -12,7 +12,7 @@ import {
 } from './libs/github'
 import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
-import { logStep, logStepWithProgress, promptForConfirmation } from './libs/prompt'
+import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import {
   compileTemplate,
   getTemplateContent,
@@ -86,7 +86,7 @@ async function copyTemplates(appName: string, appPath: string, access: AppOption
 async function copyPkg(appPath: string, access: AppOptions['access']) {
   const fileName = 'package.json'
 
-  logStepWithProgress(`Brewing ${fileName}…`)
+  const { addDetails, removeDetails } = logStepWithProgress(`Brewing ${fileName}…`)
 
   const template = await getTemplateContent(getTemplatePath(fileName))
   const existing = (await readAppFile(appPath, fileName)) ?? '{}'
@@ -95,13 +95,17 @@ async function copyPkg(appPath: string, access: AppOptions['access']) {
   const existingPkg = parsePkg(existing)
 
   let pkg = mergePkgs(existingPkg, templatePkg)
-  pkg = await pinPkgDependenciesToLatest(pkg)
+  pkg = await pinPkgDependenciesToLatest(pkg, (name) => {
+    addDetails(name)
+  })
   pkg = setPkgAccess(pkg, access)
   pkg = sortPkg(pkg)
 
   const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2))
 
-  return writeAppFile(appPath, fileName, compiledPkg)
+  await writeAppFile(appPath, fileName, compiledPkg)
+
+  removeDetails()
 }
 
 async function copyTsConfig(appPath: string) {
@@ -138,13 +142,17 @@ async function copyEsLintConfig(appPath: string) {
 }
 
 async function install(appPath: string) {
-  logStep('Preparing dependencies…\n')
+  const { addDetails, removeDetails } = logStepWithProgress('Installing dependencies…')
 
-  await installDependencies(appPath)
+  await installDependencies(appPath, (data) => {
+    addDetails(data)
+  })
+
+  removeDetails()
 }
 
 async function addGitHooks(appPath: string) {
-  logStepWithProgress('Configuring Git hooks…', true)
+  logStepWithProgress('Configuring Git hooks…')
 
   return executePackageManagerCommand(appPath, ['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'], true)
 }

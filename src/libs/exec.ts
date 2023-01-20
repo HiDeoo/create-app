@@ -7,10 +7,23 @@ export function exec(command: string, args: string[], options: ExecOptions = {})
     const child = spawn(command, args, {
       cwd: options.cwd,
       env: { ...process.env, ...options.env },
-      stdio: options.silent ? [] : 'inherit',
+      stdio: options.silent || options.onStdout ? [] : 'inherit',
     })
 
     const errorMessage = `Unable to run command: '${command} ${args.join(' ')}'.`
+
+    if (options.onStdout && child.stdout) {
+      child.stdout.on('data', (data: Buffer) => {
+        const lines = data
+          .toString()
+          .split('\n')
+          .filter((line) => line.length > 0)
+
+        for (const line of lines) {
+          options.onStdout?.(line.trim())
+        }
+      })
+    }
 
     child.on('error', (error) => {
       reject(errorWithCause(errorMessage, error))
@@ -31,5 +44,6 @@ export function exec(command: string, args: string[], options: ExecOptions = {})
 export interface ExecOptions {
   cwd?: string
   env?: NodeJS.ProcessEnv
+  onStdout?: (data: string) => void
   silent?: boolean
 }
