@@ -1,6 +1,6 @@
 import merge from 'lodash.merge'
 import sortObjectKey from 'sort-object-keys'
-import sortPackageJson from 'sort-package-json'
+import { sortPackageJson } from 'sort-package-json'
 import { type TsConfigJson } from 'type-fest'
 
 export const PRESERVED_TS_COMPILER_OPTIONS = new Set([

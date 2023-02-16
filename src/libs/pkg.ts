@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 
 import merge from 'lodash.merge'
-import sortPackageJson from 'sort-package-json'
+import { sortPackageJson } from 'sort-package-json'
 import { type PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
