@@ -208,6 +208,20 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(fileKeys).toEqual(knownKeysOrder)
   })
 
+  test('should respect the template order for package.json scripts', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileScripts = parsePkg(file).scripts
+    assert(fileScripts, 'package.json should have scripts.')
+
+    const templateScripts = parsePkg(template).scripts
+    assert(templateScripts, 'package.json template should have scripts.')
+
+    expect(Object.keys(fileScripts).filter((key) => templateScripts[key] !== undefined)).toEqual(
+      Object.keys(templateScripts).filter((key) => fileScripts[key] !== undefined)
+    )
+  })
+
   test('should add the readme file', async () => {
     const { file, template } = await getTestContent(testDir, appName, 'README.md')
 

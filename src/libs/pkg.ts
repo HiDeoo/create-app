@@ -40,6 +40,22 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
     delete mergedPkg.type
   }
 
+  // Scripts in the template should be merged after the existing ones and respect the template's order.
+  if (pkg.scripts) {
+    // Restore existing scripts if any.
+    mergedPkg.scripts = pkg.scripts
+
+    for (const script of Object.keys(mergedPkg.scripts)) {
+      if (source.scripts?.[script]) {
+        // Delete the script if it is also defined in the template.
+        delete mergedPkg.scripts[script]
+      }
+    }
+
+    // Merge the scripts from the template.
+    Object.assign(mergedPkg.scripts, source.scripts)
+  }
+
   if (mergedPkg.scripts?.['lint'] && dependenciesContains(pkg.dependencies, 'next')) {
     // If updating a Next.js application, use the `next link` wrapper instead of ESLint.
     // https://github.com/vercel/next.js/blob/5d93753bc304fa65acb11e534126d37ce1d1ebe1/packages/next/cli/next-lint.ts
@@ -96,7 +112,14 @@ async function pinDependenciesToLatest(dependencies: PackageJson.Dependency, onP
 }
 
 export function sortPkg(pkg: PackageJson) {
-  return sortPackageJson(pkg, { sortOrder: PKG_KEYS_ORDER })
+  const sortedPkg: PackageJson = sortPackageJson(pkg, { sortOrder: PKG_KEYS_ORDER })
+
+  if (pkg.scripts) {
+    // Revert the order of the scripts which are already sorted in the template.
+    sortedPkg.scripts = pkg.scripts
+  }
+
+  return sortedPkg
 }
 
 function dependenciesContains(dependencies: PackageJson.Dependency | undefined, name: string) {
