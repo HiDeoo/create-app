@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 
 import { type PackageJson } from 'type-fest'
+import * as undici from 'undici'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import { type AppOptions, createApp, updateApp } from '../src/app'
@@ -21,6 +22,14 @@ import { type TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
+
+vi.mock('undici', async () => {
+  const mod = await vi.importActual<typeof import('undici')>('undici')
+
+  return {
+    ...mod,
+  }
+})
 
 const testScenarios: TestScenario[] = [
   {
@@ -87,6 +96,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
   let templateVariables: TemplateVariables | undefined
 
+  const fetchSpy = vi.spyOn(undici, 'fetch')
+
   beforeAll(async () => {
     await beforeTest()
 
@@ -106,7 +117,11 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     return setup(testDir, appName, options)
   })
 
-  afterAll(() => afterTest())
+  afterAll(async () => {
+    fetchSpy.mockRestore()
+
+    await afterTest()
+  })
 
   test('should copy all templates', async () => {
     const testDirPaths = await getTestDirPaths(testDir)
@@ -300,6 +315,27 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         '.husky/pre-commit',
         'pnpm-lock.yaml',
       ])
+    })
+
+    test('should cache jsdelivr results', () => {
+      const jsdelivrRequestRegExp = /https:\/\/cdn.jsdelivr.net\/npm\/(?<pkg>.*)\/package.json$/
+      const pkgs = new Set<string>()
+
+      for (const call of fetchSpy.mock.calls) {
+        const url = call[0]
+        assert(typeof url === 'string', 'Fetch request info is not a valid URL.')
+
+        const matches = url.match(jsdelivrRequestRegExp)
+
+        if (matches) {
+          const pkg = matches.groups?.['pkg']
+          assert(typeof pkg === 'string', 'Invalid jsdelivr package name.')
+
+          expect(pkgs.has(pkg)).toBe(false)
+
+          pkgs.add(pkg)
+        }
+      }
     })
   })
 

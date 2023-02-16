@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE } from '../config'
 
 import { exec, type ExecOptions } from './exec'
-import { getPkgLatestVersion } from './unpkg'
+import { getPkgLatestVersion } from './jsdelivr'
 
 export function getPkgManagerLatestVersion() {
   return getPkgLatestVersion(PACKAGE_MANAGER)

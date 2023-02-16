@@ -7,8 +7,8 @@ import glob from 'tiny-glob'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
 
+import { JSDELIVR_URL } from '../src/libs/jsdelivr'
 import * as prompt from '../src/libs/prompt'
-import { UNPKG_URL } from '../src/libs/unpkg'
 
 export function setupTest(testName: string) {
   const testDir = path.join(os.tmpdir(), crypto.randomUUID(), testName)
@@ -27,8 +27,9 @@ export function setupTest(testName: string) {
 
     mockAgent = new MockAgent()
     setGlobalDispatcher(mockAgent)
+    mockAgent.disableNetConnect()
 
-    const mockPool = mockAgent.get(UNPKG_URL)
+    const mockPool = mockAgent.get(JSDELIVR_URL)
 
     mockPool
       .intercept({ path: () => true })

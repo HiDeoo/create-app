@@ -30,7 +30,7 @@ const userDefinedTemplateVariableKeys = [
   'RELEASE_STEP',
 ] as const satisfies readonly (typeof templateVariableKeys)[number][]
 
-let userDefinedTemplateVariables: UserDefinedTemplateVariables | undefined
+let templateVariables: TemplateVariables | undefined
 
 export async function getTemplatePaths(ignoreSpecialTemplates = true) {
   const templatePath = getTemplatesPath()
@@ -63,8 +63,25 @@ export function getTemplateContent(templatePath: string) {
   return fs.readFile(templatePath, { encoding: 'utf8' })
 }
 
-export function setTemplateVariables(variables: UserDefinedTemplateVariables) {
-  userDefinedTemplateVariables = variables
+export async function setTemplateVariables(variables: UserDefinedTemplateVariables) {
+  const latestPmVersion = await getPkgManagerLatestVersion()
+
+  if (!latestPmVersion) {
+    throw new Error('Unable to get latest package manager version.')
+  }
+
+  templateVariables = {
+    APP_NAME: variables.APP_NAME,
+    PACKAGE_MANAGER,
+    PACKAGE_MANAGER_VERSION: latestPmVersion,
+    NODE_VERSION,
+    RELEASE_REGISTRY_URL: variables.RELEASE_REGISTRY_URL,
+    RELEASE_STEP: variables.RELEASE_STEP,
+    USER_NAME,
+    USER_MAIL,
+    USER_SITE,
+    YEAR: new Date().getFullYear(),
+  }
 }
 
 export async function compileTemplate(content: string) {
@@ -99,31 +116,12 @@ function isValidTemplateVariable(variable: string): variable is keyof TemplateVa
   return templateVariableKeys.includes(variable as (typeof templateVariableKeys)[number])
 }
 
-async function getTemplateVariables(): Promise<TemplateVariables> {
-  if (!userDefinedTemplateVariables) {
-    throw new Error(
-      'User defined template variables are not defined, you probably forget to call `setTemplateVariables()`.'
-    )
+function getTemplateVariables(): TemplateVariables {
+  if (!templateVariables) {
+    throw new Error('Template variables are not defined, you probably forget to call `setTemplateVariables()`.')
   }
 
-  const latestPmVersion = await getPkgManagerLatestVersion()
-
-  if (!latestPmVersion) {
-    throw new Error('Unable to get latest package manager version.')
-  }
-
-  return {
-    APP_NAME: userDefinedTemplateVariables.APP_NAME,
-    PACKAGE_MANAGER,
-    PACKAGE_MANAGER_VERSION: latestPmVersion,
-    NODE_VERSION,
-    RELEASE_REGISTRY_URL: userDefinedTemplateVariables.RELEASE_REGISTRY_URL,
-    RELEASE_STEP: userDefinedTemplateVariables.RELEASE_STEP,
-    USER_NAME,
-    USER_MAIL,
-    USER_SITE,
-    YEAR: new Date().getFullYear(),
-  }
+  return templateVariables
 }
 
 interface Template {
