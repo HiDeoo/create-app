@@ -1,8 +1,5 @@
 lockfileVersion: 5.4
 
-overrides:
-  esquery: 1.4.0
-
 specifiers:
   '@hideoo/eslint-config': 1.1.0
   '@hideoo/prettier-config': 1.0.1
