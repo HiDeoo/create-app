@@ -28,7 +28,7 @@ const userDefinedTemplateVariableKeys = [
   'APP_NAME',
   'RELEASE_REGISTRY_URL',
   'RELEASE_STEP',
-] as const satisfies readonly typeof templateVariableKeys[number][]
+] as const satisfies readonly (typeof templateVariableKeys)[number][]
 
 let userDefinedTemplateVariables: UserDefinedTemplateVariables | undefined
 
@@ -96,7 +96,7 @@ function getTemplatesPath() {
 }
 
 function isValidTemplateVariable(variable: string): variable is keyof TemplateVariables {
-  return templateVariableKeys.includes(variable as typeof templateVariableKeys[number])
+  return templateVariableKeys.includes(variable as (typeof templateVariableKeys)[number])
 }
 
 async function getTemplateVariables(): Promise<TemplateVariables> {
@@ -132,11 +132,11 @@ interface Template {
 }
 
 export type TemplateVariables = {
-  [key in typeof templateVariableKeys[number]]: TemplateVariableValue
+  [key in (typeof templateVariableKeys)[number]]: TemplateVariableValue
 }
 
 export type UserDefinedTemplateVariables = {
-  [key in typeof userDefinedTemplateVariableKeys[number]]: TemplateVariableValue
+  [key in (typeof userDefinedTemplateVariableKeys)[number]]: TemplateVariableValue
 }
 
 type TemplateVariableKey = string
