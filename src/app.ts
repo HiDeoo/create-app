@@ -69,7 +69,7 @@ async function setupGitRepository(appPath: string) {
 async function copyTemplates(appName: string, appPath: string, access: AppOptions['access']) {
   logStepWithProgress('Copying templates…')
 
-  setTemplateVariables(getUserDefinedTemplateVariables(appName, access))
+  await setTemplateVariables(getUserDefinedTemplateVariables(appName, access))
 
   const templatePaths = await getTemplatePaths()
 

@@ -8,7 +8,7 @@ import validateNpmPackageName from 'validate-npm-package-name'
 import { type AppOptions } from '../app'
 import { NODE_VERSION, PKG_KEYS_ORDER } from '../config'
 
-import { getPkgLatestVersion } from './unpkg'
+import { getPkgLatestVersion } from './jsdelivr'
 
 export function isValidPkgName(name: string) {
   return validateNpmPackageName(name).validForNewPackages
