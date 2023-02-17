@@ -59,6 +59,7 @@ export function logError(error: unknown) {
 
 export async function promptForName(): Promise<string> {
   const { name } = await prompts({
+    initial: path.basename(process.cwd()),
     message: 'App name:',
     name: 'name',
     onState: onPromptStateChange,
