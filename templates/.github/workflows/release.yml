@@ -55,6 +55,6 @@ jobs:
       [[RELEASE_STEP]]
 
       - name: Generate changelog
-        run: pnpx changelogithub
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        uses: hideoo/changelogithub-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
