@@ -1,5 +1,4 @@
-.github/blocks/file
-.github/blocks/folder
+.github/blocks
 .next
 .vercel
 .vscode-test
