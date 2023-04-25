@@ -1,4 +1,4 @@
-import { type Linter } from 'eslint'
+import type { Linter } from 'eslint'
 import merge from 'lodash.merge'
 
 export function parseEsLintConfig(config: string): Linter.Config {
