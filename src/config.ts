@@ -12,7 +12,8 @@ export const NPM_PROVENANCE_PERMISSION = 'id-token: write'
 export const NPM_RELEASE_STEP = `- name: Publish
         run: pnpm publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}`
+          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true`
 
 export const PKG_KEYS_ORDER = [
   '$schema',
