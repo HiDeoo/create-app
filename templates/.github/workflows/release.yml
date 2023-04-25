@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      ((RELEASE_PERMISSIONS))
     steps:
       - name: Checkout
         uses: actions/checkout@v3

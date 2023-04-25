@@ -7,6 +7,7 @@ import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 import { type AppOptions, createApp, updateApp } from '../src/app'
 import {
   NODE_VERSION,
+  NPM_PROVENANCE_PERMISSION,
   NPM_REGISTRY_URL,
   NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
@@ -106,6 +107,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
+      RELEASE_PERMISSIONS: options.access === 'public' ? NPM_PROVENANCE_PERMISSION : '',
       RELEASE_REGISTRY_URL: options.access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
       RELEASE_STEP: options.access === 'public' ? NPM_RELEASE_STEP : '',
       USER_NAME,
