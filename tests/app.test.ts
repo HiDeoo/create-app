@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 
-import { type PackageJson } from 'type-fest'
+import type { PackageJson } from 'type-fest'
 import * as undici from 'undici'
 import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 
@@ -18,7 +18,7 @@ import {
 } from '../src/config'
 import { parseEsLintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/pkg'
-import { type TemplateVariables } from '../src/libs/template'
+import type { TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
