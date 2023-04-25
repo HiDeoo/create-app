@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
+import { NPM_PROVENANCE_PERMISSION, NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
 import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
@@ -76,7 +76,7 @@ async function copyTemplates(appName: string, appPath: string, access: AppOption
   return Promise.all(
     templatePaths.map(async ({ destination, source }) => {
       const templateContent = await getTemplateContent(source)
-      const compiledTemplate = await compileTemplate(templateContent)
+      const compiledTemplate = compileTemplate(templateContent)
 
       return writeAppFile(appPath, destination, compiledTemplate)
     })
@@ -101,7 +101,7 @@ async function copyPkg(appPath: string, access: AppOptions['access']) {
   pkg = setPkgAccess(pkg, access)
   pkg = sortPkg(pkg)
 
-  const compiledPkg = await compileTemplate(JSON.stringify(pkg, null, 2))
+  const compiledPkg = compileTemplate(JSON.stringify(pkg, null, 2))
 
   await writeAppFile(appPath, fileName, compiledPkg)
 
@@ -222,6 +222,7 @@ function ensureDirectory(dirPath: string) {
 function getUserDefinedTemplateVariables(appName: string, access: AppOptions['access']): UserDefinedTemplateVariables {
   return {
     APP_NAME: appName,
+    RELEASE_PERMISSIONS: access === 'public' ? NPM_PROVENANCE_PERMISSION : '',
     RELEASE_REGISTRY_URL: access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
     RELEASE_STEP: access === 'public' ? NPM_RELEASE_STEP : '',
   }

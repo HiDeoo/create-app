@@ -16,6 +16,7 @@ const templateVariableKeys = [
   'PACKAGE_MANAGER',
   'PACKAGE_MANAGER_VERSION',
   'NODE_VERSION',
+  'RELEASE_PERMISSIONS',
   'RELEASE_REGISTRY_URL',
   'RELEASE_STEP',
   'USER_MAIL',
@@ -26,6 +27,7 @@ const templateVariableKeys = [
 
 const userDefinedTemplateVariableKeys = [
   'APP_NAME',
+  'RELEASE_PERMISSIONS',
   'RELEASE_REGISTRY_URL',
   'RELEASE_STEP',
 ] as const satisfies readonly (typeof templateVariableKeys)[number][]
@@ -75,6 +77,7 @@ export async function setTemplateVariables(variables: UserDefinedTemplateVariabl
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
+    RELEASE_PERMISSIONS: variables.RELEASE_PERMISSIONS,
     RELEASE_REGISTRY_URL: variables.RELEASE_REGISTRY_URL,
     RELEASE_STEP: variables.RELEASE_STEP,
     USER_NAME,
@@ -84,8 +87,8 @@ export async function setTemplateVariables(variables: UserDefinedTemplateVariabl
   }
 }
 
-export async function compileTemplate(content: string) {
-  const templateVariables = await getTemplateVariables()
+export function compileTemplate(content: string) {
+  const templateVariables = getTemplateVariables()
 
   const compiledContent = content.replaceAll(
     /(?:\[\[(\w+)]])|(?:(\n\s+)\(\((\w+)\)\))/g,
