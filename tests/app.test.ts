@@ -18,7 +18,7 @@ import {
   USER_NAME,
   USER_SITE,
 } from '../src/config'
-import { parseEsLintConfig } from '../src/libs/eslint'
+import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES, parseEslintConfig } from '../src/libs/eslint'
 import { parsePkg } from '../src/libs/pkg'
 import type { TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
@@ -421,14 +421,20 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   test('should add or update the .eslintrc.json file', async () => {
     const { file, fixture } = await getTestContent(testDir, appName, '.eslintrc.json')
 
-    const fileEsLintConfig = parseEsLintConfig(file)
-    const fixtureEsLintConfig = parseEsLintConfig(fixture ?? '{}')
+    const fileEslintConfig = parseEslintConfig(file)
+    const fixtureEslintConfig = parseEslintConfig(fixture ?? '{}')
 
-    expect(Object.keys(fileEsLintConfig as Record<string, unknown>).length).toBe(1)
-    expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
+    expect(Object.keys(fileEslintConfig as Record<string, unknown>).length).toBe(1)
+    expect(fileEslintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
 
-    if (fixtureEsLintConfig.extends) {
-      expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining([fixtureEsLintConfig.extends]))
+    if (fixtureEslintConfig.extends) {
+      expect(fileEslintConfig.extends).toEqual(expect.arrayContaining([fixtureEslintConfig.extends]))
+    }
+  })
+
+  test('should delete unsupported ESLint configuration files', async () => {
+    for (const fileName of UNSUPPORTED_ESLINT_CONFIG_FILENAMES) {
+      await expect(getTestContent(testDir, appName, fileName)).rejects.toThrow()
     }
   })
 

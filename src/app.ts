@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { NPM_PROVENANCE_PERMISSION, NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
-import { mergeEsLintConfigs, parseEsLintConfig } from './libs/eslint'
+import { deleteUnsupportedEslintConfigs, mergeEslintConfigs, parseEslintConfig } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
   addRepositorySecret,
@@ -43,7 +43,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyTemplates(appName, appPath, options.access)
   await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
-  await copyEsLintConfig(appPath)
+  await copyEslintConfig(appPath)
 
   await install(appPath)
 
@@ -125,18 +125,20 @@ async function copyTsConfig(appPath: string) {
   return writeAppJsonFile(appPath, fileName, tsConfig)
 }
 
-async function copyEsLintConfig(appPath: string) {
+async function copyEslintConfig(appPath: string) {
   logStepWithProgress('Setting up ESLint…')
+
+  await deleteUnsupportedEslintConfigs(appPath)
 
   const fileName = '.eslintrc.json'
 
   const template = await getTemplateContent(getTemplatePath(fileName))
   const existing = (await readAppFile(appPath, fileName)) ?? '{}'
 
-  const templateEsLintConfig = parseEsLintConfig(template)
-  const existingEsLintConfig = parseEsLintConfig(existing)
+  const templateEslintConfig = parseEslintConfig(template)
+  const existingEslintConfig = parseEslintConfig(existing)
 
-  const esLintConfig = mergeEsLintConfigs(existingEsLintConfig, templateEsLintConfig)
+  const esLintConfig = mergeEslintConfigs(existingEslintConfig, templateEslintConfig)
 
   return writeAppJsonFile(appPath, fileName, esLintConfig)
 }

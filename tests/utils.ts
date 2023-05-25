@@ -76,9 +76,15 @@ export async function getExpectedPaths() {
 
 export async function getTestContent(testDir: string, appName: string, filePath: string) {
   const file = await fs.readFile(path.join(testDir, filePath), { encoding: 'utf8' })
-  const template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
 
   let fixture: string | undefined
+  let template = ''
+
+  try {
+    template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
+  } catch {
+    //
+  }
 
   try {
     fixture = await fs.readFile(path.join('fixtures', appName, filePath), { encoding: 'utf8' })
