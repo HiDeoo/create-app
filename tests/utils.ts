@@ -33,7 +33,19 @@ export function setupTest(testName: string) {
 
     mockPool
       .intercept({ path: () => true })
-      .reply(200, () => ({ version: 'la.te.st' }))
+      .reply(200, (opts) => {
+        if (opts.path === '/npm/@hideoo/tsconfig/tsconfig.json') {
+          // This is just an excerpt of the real tsconfig.json file used to test config merging.
+          return {
+            $schema: 'https://json.schemastore.org/tsconfig',
+            compilerOptions: {
+              target: 'ESNext',
+            },
+          }
+        }
+
+        return { version: 'la.te.st' }
+      })
       .persist()
 
     await fs.mkdir(testDir, { recursive: true })

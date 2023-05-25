@@ -19,6 +19,7 @@ import {
   USER_SITE,
 } from '../src/config'
 import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES, parseEslintConfig } from '../src/libs/eslint'
+import { getPkgTsConfig } from '../src/libs/jsdelivr'
 import { parsePkg } from '../src/libs/pkg'
 import type { TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
@@ -379,11 +380,17 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(fileTsConfig.extends).toBe('@hideoo/tsconfig')
 
+    const inheritedConfig = await getPkgTsConfig('@hideoo/tsconfig')
+
     let expectedCompilerOptions = 0
 
     if (fixtureTsConfig.compilerOptions) {
-      for (const compilerOptions of PRESERVED_TS_COMPILER_OPTIONS) {
-        if (compilerOptions in fixtureTsConfig.compilerOptions) {
+      for (const compilerOption of PRESERVED_TS_COMPILER_OPTIONS) {
+        if (
+          compilerOption in fixtureTsConfig.compilerOptions &&
+          (!inheritedConfig.compilerOptions?.[compilerOption] ||
+            fixtureTsConfig.compilerOptions[compilerOption] !== inheritedConfig.compilerOptions[compilerOption])
+        ) {
           expectedCompilerOptions += 1
         }
       }
@@ -391,13 +398,14 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(Object.keys(fileTsConfig.compilerOptions ?? {}).length).toBe(expectedCompilerOptions)
 
-    expect(fileTsConfig.compilerOptions?.allowJs).toBe(fixtureTsConfig.compilerOptions?.allowJs)
-    expect(fileTsConfig.compilerOptions?.jsx).toBe(fixtureTsConfig.compilerOptions?.jsx)
-    expect(fileTsConfig.compilerOptions?.jsxFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFactory)
-    expect(fileTsConfig.compilerOptions?.jsxFragmentFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFragmentFactory)
-    expect(fileTsConfig.compilerOptions?.jsxImportSource).toBe(fixtureTsConfig.compilerOptions?.jsxImportSource)
-    expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
-    expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
+    for (const compilerOption of PRESERVED_TS_COMPILER_OPTIONS) {
+      if (
+        !inheritedConfig.compilerOptions?.[compilerOption] ||
+        fixtureTsConfig.compilerOptions?.[compilerOption] !== inheritedConfig.compilerOptions[compilerOption]
+      ) {
+        expect(fileTsConfig.compilerOptions?.[compilerOption]).toBe(fixtureTsConfig.compilerOptions?.[compilerOption])
+      }
+    }
   })
 
   test('should partially order the tsconfig.json file keys', async () => {

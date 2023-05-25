@@ -119,7 +119,7 @@ async function copyTsConfig(appPath: string) {
   const templateTsConfig = parseTsConfig(template)
   const existingTsConfig = parseTsConfig(existing)
 
-  let tsConfig = mergeTsConfigs(existingTsConfig, templateTsConfig)
+  let tsConfig = await mergeTsConfigs(existingTsConfig, templateTsConfig)
   tsConfig = sortTsConfig(tsConfig)
 
   return writeAppJsonFile(appPath, fileName, tsConfig)
