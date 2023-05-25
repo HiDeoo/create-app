@@ -12,6 +12,7 @@ import {
   NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
   PACKAGE_MANAGER_EXECUTE,
+  PKG_INVALID_DEPENDENCIES,
   PKG_KEYS_ORDER,
   USER_MAIL,
   USER_NAME,
@@ -222,6 +223,21 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(Object.keys(fileScripts).filter((key) => templateScripts[key] !== undefined)).toEqual(
       Object.keys(templateScripts).filter((key) => fileScripts[key] !== undefined)
     )
+  })
+
+  test('should remove invalid dependencies from package.json', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileDependencies = parsePkg(file).dependencies
+
+    if (fileDependencies) {
+      expect(Object.keys(fileDependencies).every((key) => !PKG_INVALID_DEPENDENCIES.includes(key))).toBe(true)
+    }
+
+    const fileDevDependencies = parsePkg(file).devDependencies
+    assert(fileDevDependencies, 'package.json should have dev dependencies.')
+
+    expect(Object.keys(fileDevDependencies).every((key) => !PKG_INVALID_DEPENDENCIES.includes(key))).toBe(true)
   })
 
   test('should add the readme file', async () => {
@@ -456,7 +472,9 @@ function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?:
     return
   }
 
-  expect(Object.keys(newDeps)).toEqual(expect.arrayContaining(Object.keys(oldDeps)))
+  expect(Object.keys(newDeps)).toEqual(
+    expect.arrayContaining(Object.keys(oldDeps).filter((oldDep) => !PKG_INVALID_DEPENDENCIES.includes(oldDep)))
+  )
 }
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {
