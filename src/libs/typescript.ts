@@ -1,3 +1,4 @@
+import { parse as parseJsonc } from 'comment-json'
 import merge from 'lodash.merge'
 import sortObjectKey from 'sort-object-keys'
 import { sortPackageJson } from 'sort-package-json'
@@ -14,7 +15,7 @@ export const PRESERVED_TS_COMPILER_OPTIONS = new Set([
 ])
 
 export function parseTsConfig(config: string): TsConfigJson {
-  return JSON.parse(config)
+  return parseJsonc(config, undefined, true) as TsConfigJson
 }
 
 export function mergeTsConfigs(config: TsConfigJson, source: TsConfigJson) {
