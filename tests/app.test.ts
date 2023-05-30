@@ -84,7 +84,7 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
-    appName: 'next-ts',
+    appName: 'next-ts-pages',
     description: 'should update a private Next.js app with TypeScript',
     options: { access: 'private', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
@@ -415,7 +415,15 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         !inheritedConfig.compilerOptions?.[compilerOption] ||
         fixtureTsConfig.compilerOptions?.[compilerOption] !== inheritedConfig.compilerOptions[compilerOption]
       ) {
-        expect(fileTsConfig.compilerOptions?.[compilerOption]).toBe(fixtureTsConfig.compilerOptions?.[compilerOption])
+        const option = fileTsConfig.compilerOptions?.[compilerOption]
+
+        if (typeof option === 'object') {
+          expect(fileTsConfig.compilerOptions?.[compilerOption]).toEqual(
+            fixtureTsConfig.compilerOptions?.[compilerOption]
+          )
+        } else {
+          expect(fileTsConfig.compilerOptions?.[compilerOption]).toBe(fixtureTsConfig.compilerOptions?.[compilerOption])
+        }
       }
     }
   })

@@ -13,6 +13,7 @@ export const PRESERVED_TS_COMPILER_OPTIONS = new Set<keyof TsConfigJson.Compiler
   'jsxFragmentFactory',
   'jsxImportSource',
   'noEmit',
+  'paths',
   'target',
 ])
 
