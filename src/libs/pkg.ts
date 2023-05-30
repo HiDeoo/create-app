@@ -69,6 +69,9 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
     }
   }
 
+  // Remove TypeScript regular dependency if it exists as it is already a devDependency.
+  delete mergedPkg.dependencies?.['typescript']
+
   // Repeat the same process for devDependencies.
   for (const devDependency of Object.keys(mergedPkg.devDependencies ?? {})) {
     if (PKG_INVALID_DEPENDENCIES.includes(devDependency)) {

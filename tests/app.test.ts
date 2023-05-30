@@ -168,7 +168,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(filePkg.description).toBe(templatePkg.description)
 
     expectPinnedDependenciesToLatest(filePkg.dependencies)
-    expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies)
+    expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies, ['typescript'])
 
     expectPinnedDependenciesToLatest(filePkg.devDependencies)
     expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
@@ -251,6 +251,16 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     assert(fileDevDependencies, 'package.json should have dev dependencies.')
 
     expect(Object.keys(fileDevDependencies).every((key) => !PKG_INVALID_DEPENDENCIES.includes(key))).toBe(true)
+  })
+
+  test('should never include TypeScript as a regular depdency', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileDependencies = parsePkg(file).dependencies
+
+    if (fileDependencies) {
+      expect(fileDependencies['typescript']).not.toBeDefined()
+    }
   })
 
   test('should add the readme file', async () => {
@@ -501,13 +511,19 @@ function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
   }
 }
 
-function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?: PackageJson.Dependency) {
+function expectPersistedDependencies(
+  oldDeps?: PackageJson.Dependency,
+  newDeps?: PackageJson.Dependency,
+  invalidDeps?: string[]
+) {
   if (!oldDeps || !newDeps) {
     return
   }
 
   expect(Object.keys(newDeps)).toEqual(
-    expect.arrayContaining(Object.keys(oldDeps).filter((oldDep) => !PKG_INVALID_DEPENDENCIES.includes(oldDep)))
+    expect.arrayContaining(
+      Object.keys(oldDeps).filter((oldDep) => ![...PKG_INVALID_DEPENDENCIES, ...(invalidDeps ?? [])].includes(oldDep))
+    )
   )
 }
 
