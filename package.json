@@ -16,6 +16,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "comment-json": "4.2.3",
     "kolorist": "1.8.0",
     "lodash.merge": "4.6.2",
     "open": "9.1.0",

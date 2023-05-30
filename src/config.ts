@@ -15,6 +15,13 @@ export const NPM_RELEASE_STEP = `- name: Publish
           NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true`
 
+export const PKG_INVALID_DEPENDENCIES = [
+  '@typescript-eslint/eslint-plugin',
+  '@typescript-eslint/parser',
+  'eslint-plugin-react-hooks',
+  'eslint-plugin-react-refresh',
+]
+
 export const PKG_KEYS_ORDER = [
   '$schema',
   'name',

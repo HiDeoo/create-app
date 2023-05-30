@@ -12,12 +12,14 @@ import {
   NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
   PACKAGE_MANAGER_EXECUTE,
+  PKG_INVALID_DEPENDENCIES,
   PKG_KEYS_ORDER,
   USER_MAIL,
   USER_NAME,
   USER_SITE,
 } from '../src/config'
-import { parseEsLintConfig } from '../src/libs/eslint'
+import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES, parseEslintConfig } from '../src/libs/eslint'
+import { getPkgTsConfig } from '../src/libs/jsdelivr'
 import { parsePkg } from '../src/libs/pkg'
 import type { TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
@@ -58,6 +60,18 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
+    appName: 'vite-react-ts-swc',
+    description: 'should update a private Vite app with React & TypeScript & SWC',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'vite-react-ts-swc',
+    description: 'should update a public Vite app with React & TypeScript & SWC',
+    options: { access: 'public', isNew: false, npmToken: 'token' },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
     appName: 'vite-preact-ts',
     description: 'should update a private Vite app with Preact & TypeScript',
     options: { access: 'private', isNew: false },
@@ -70,8 +84,14 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
-    appName: 'next-ts',
-    description: 'should update a private Next.js app with TypeScript',
+    appName: 'next-ts-pages',
+    description: 'should update a private Next.js app with TypeScript using the Pages Router',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'next-ts-app',
+    description: 'should update a private Next.js app with TypeScript using the App Router',
     options: { access: 'private', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
@@ -154,7 +174,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(filePkg.description).toBe(templatePkg.description)
 
     expectPinnedDependenciesToLatest(filePkg.dependencies)
-    expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies)
+    expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies, ['typescript'])
 
     expectPinnedDependenciesToLatest(filePkg.devDependencies)
     expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
@@ -222,6 +242,31 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(Object.keys(fileScripts).filter((key) => templateScripts[key] !== undefined)).toEqual(
       Object.keys(templateScripts).filter((key) => fileScripts[key] !== undefined)
     )
+  })
+
+  test('should remove invalid dependencies from package.json', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileDependencies = parsePkg(file).dependencies
+
+    if (fileDependencies) {
+      expect(Object.keys(fileDependencies).every((key) => !PKG_INVALID_DEPENDENCIES.includes(key))).toBe(true)
+    }
+
+    const fileDevDependencies = parsePkg(file).devDependencies
+    assert(fileDevDependencies, 'package.json should have dev dependencies.')
+
+    expect(Object.keys(fileDevDependencies).every((key) => !PKG_INVALID_DEPENDENCIES.includes(key))).toBe(true)
+  })
+
+  test('should never include TypeScript as a regular depdency', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileDependencies = parsePkg(file).dependencies
+
+    if (fileDependencies) {
+      expect(fileDependencies['typescript']).not.toBeDefined()
+    }
   })
 
   test('should add the readme file', async () => {
@@ -363,11 +408,17 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(fileTsConfig.extends).toBe('@hideoo/tsconfig')
 
+    const inheritedConfig = await getPkgTsConfig('@hideoo/tsconfig')
+
     let expectedCompilerOptions = 0
 
     if (fixtureTsConfig.compilerOptions) {
-      for (const compilerOptions of PRESERVED_TS_COMPILER_OPTIONS) {
-        if (compilerOptions in fixtureTsConfig.compilerOptions) {
+      for (const compilerOption of PRESERVED_TS_COMPILER_OPTIONS) {
+        if (
+          compilerOption in fixtureTsConfig.compilerOptions &&
+          (!inheritedConfig.compilerOptions?.[compilerOption] ||
+            fixtureTsConfig.compilerOptions[compilerOption] !== inheritedConfig.compilerOptions[compilerOption])
+        ) {
           expectedCompilerOptions += 1
         }
       }
@@ -375,13 +426,22 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(Object.keys(fileTsConfig.compilerOptions ?? {}).length).toBe(expectedCompilerOptions)
 
-    expect(fileTsConfig.compilerOptions?.allowJs).toBe(fixtureTsConfig.compilerOptions?.allowJs)
-    expect(fileTsConfig.compilerOptions?.jsx).toBe(fixtureTsConfig.compilerOptions?.jsx)
-    expect(fileTsConfig.compilerOptions?.jsxFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFactory)
-    expect(fileTsConfig.compilerOptions?.jsxFragmentFactory).toBe(fixtureTsConfig.compilerOptions?.jsxFragmentFactory)
-    expect(fileTsConfig.compilerOptions?.jsxImportSource).toBe(fixtureTsConfig.compilerOptions?.jsxImportSource)
-    expect(fileTsConfig.compilerOptions?.noEmit).toBe(fixtureTsConfig.compilerOptions?.noEmit)
-    expect(fileTsConfig.compilerOptions?.target).toBe(fixtureTsConfig.compilerOptions?.target)
+    for (const compilerOption of PRESERVED_TS_COMPILER_OPTIONS) {
+      if (
+        !inheritedConfig.compilerOptions?.[compilerOption] ||
+        fixtureTsConfig.compilerOptions?.[compilerOption] !== inheritedConfig.compilerOptions[compilerOption]
+      ) {
+        const option = fileTsConfig.compilerOptions?.[compilerOption]
+
+        if (typeof option === 'object') {
+          expect(fileTsConfig.compilerOptions?.[compilerOption]).toEqual(
+            fixtureTsConfig.compilerOptions?.[compilerOption]
+          )
+        } else {
+          expect(fileTsConfig.compilerOptions?.[compilerOption]).toBe(fixtureTsConfig.compilerOptions?.[compilerOption])
+        }
+      }
+    }
   })
 
   test('should partially order the tsconfig.json file keys', async () => {
@@ -405,14 +465,20 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   test('should add or update the .eslintrc.json file', async () => {
     const { file, fixture } = await getTestContent(testDir, appName, '.eslintrc.json')
 
-    const fileEsLintConfig = parseEsLintConfig(file)
-    const fixtureEsLintConfig = parseEsLintConfig(fixture ?? '{}')
+    const fileEslintConfig = parseEslintConfig(file)
+    const fixtureEslintConfig = parseEslintConfig(fixture ?? '{}')
 
-    expect(Object.keys(fileEsLintConfig as Record<string, unknown>).length).toBe(1)
-    expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
+    expect(Object.keys(fileEslintConfig as Record<string, unknown>).length).toBe(1)
+    expect(fileEslintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
 
-    if (fixtureEsLintConfig.extends) {
-      expect(fileEsLintConfig.extends).toEqual(expect.arrayContaining([fixtureEsLintConfig.extends]))
+    if (fixtureEslintConfig.extends) {
+      expect(fileEslintConfig.extends).toEqual(expect.arrayContaining([fixtureEslintConfig.extends]))
+    }
+  })
+
+  test('should delete unsupported ESLint configuration files', async () => {
+    for (const fileName of UNSUPPORTED_ESLINT_CONFIG_FILENAMES) {
+      await expect(getTestContent(testDir, appName, fileName)).rejects.toThrow()
     }
   })
 
@@ -451,12 +517,20 @@ function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
   }
 }
 
-function expectPersistedDependencies(oldDeps?: PackageJson.Dependency, newDeps?: PackageJson.Dependency) {
+function expectPersistedDependencies(
+  oldDeps?: PackageJson.Dependency,
+  newDeps?: PackageJson.Dependency,
+  invalidDeps?: string[]
+) {
   if (!oldDeps || !newDeps) {
     return
   }
 
-  expect(Object.keys(newDeps)).toEqual(expect.arrayContaining(Object.keys(oldDeps)))
+  expect(Object.keys(newDeps)).toEqual(
+    expect.arrayContaining(
+      Object.keys(oldDeps).filter((oldDep) => ![...PKG_INVALID_DEPENDENCIES, ...(invalidDeps ?? [])].includes(oldDep))
+    )
+  )
 }
 
 function expectCompiledTemplate(template: string, content: string, variables: TemplateVariables | undefined) {

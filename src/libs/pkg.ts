@@ -6,7 +6,7 @@ import type { PackageJson } from 'type-fest'
 import validateNpmPackageName from 'validate-npm-package-name'
 
 import type { AppOptions } from '../app'
-import { NODE_VERSION, PKG_KEYS_ORDER } from '../config'
+import { NODE_VERSION, PKG_INVALID_DEPENDENCIES, PKG_KEYS_ORDER } from '../config'
 
 import { getPkgLatestVersion } from './jsdelivr'
 
@@ -57,9 +57,26 @@ export function mergePkgs(pkg: PackageJson, source: PackageJson) {
   }
 
   if (mergedPkg.scripts?.['lint'] && dependenciesContains(pkg.dependencies, 'next')) {
-    // If updating a Next.js application, use the `next link` wrapper instead of ESLint.
+    // If updating a Next.js application, use the `next lint` wrapper instead of ESLint.
     // https://github.com/vercel/next.js/blob/5d93753bc304fa65acb11e534126d37ce1d1ebe1/packages/next/cli/next-lint.ts
     mergedPkg.scripts['lint'] = mergedPkg.scripts['lint'].replace('eslint .', 'next lint -d .')
+  }
+
+  // Remove invalid dependencies, e.g. some ESLint related dependencies that are provided by `@hideoo/eslint-config`.
+  for (const dependency of Object.keys(mergedPkg.dependencies ?? {})) {
+    if (PKG_INVALID_DEPENDENCIES.includes(dependency)) {
+      delete mergedPkg.dependencies?.[dependency]
+    }
+  }
+
+  // Remove TypeScript regular dependency if it exists as it is already a devDependency.
+  delete mergedPkg.dependencies?.['typescript']
+
+  // Repeat the same process for devDependencies.
+  for (const devDependency of Object.keys(mergedPkg.devDependencies ?? {})) {
+    if (PKG_INVALID_DEPENDENCIES.includes(devDependency)) {
+      delete mergedPkg.devDependencies?.[devDependency]
+    }
   }
 
   return mergedPkg

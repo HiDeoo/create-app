@@ -33,7 +33,19 @@ export function setupTest(testName: string) {
 
     mockPool
       .intercept({ path: () => true })
-      .reply(200, () => ({ version: 'la.te.st' }))
+      .reply(200, (opts) => {
+        if (opts.path === '/npm/@hideoo/tsconfig/tsconfig.json') {
+          // This is just an excerpt of the real tsconfig.json file used to test config merging.
+          return {
+            $schema: 'https://json.schemastore.org/tsconfig',
+            compilerOptions: {
+              target: 'ESNext',
+            },
+          }
+        }
+
+        return { version: 'la.te.st' }
+      })
       .persist()
 
     await fs.mkdir(testDir, { recursive: true })
@@ -76,9 +88,15 @@ export async function getExpectedPaths() {
 
 export async function getTestContent(testDir: string, appName: string, filePath: string) {
   const file = await fs.readFile(path.join(testDir, filePath), { encoding: 'utf8' })
-  const template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
 
   let fixture: string | undefined
+  let template = ''
+
+  try {
+    template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
+  } catch {
+    //
+  }
 
   try {
     fixture = await fs.readFile(path.join('fixtures', appName, filePath), { encoding: 'utf8' })
