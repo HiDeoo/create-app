@@ -14,6 +14,7 @@ export const PRESERVED_TS_COMPILER_OPTIONS = new Set<keyof TsConfigJson.Compiler
   'jsxImportSource',
   'noEmit',
   'paths',
+  'plugins',
   'target',
 ])
 

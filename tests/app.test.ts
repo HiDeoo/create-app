@@ -85,7 +85,13 @@ const testScenarios: TestScenario[] = [
   },
   {
     appName: 'next-ts-pages',
-    description: 'should update a private Next.js app with TypeScript',
+    description: 'should update a private Next.js app with TypeScript using the Pages Router',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'next-ts-app',
+    description: 'should update a private Next.js app with TypeScript using the App Router',
     options: { access: 'private', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
