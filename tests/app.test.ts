@@ -60,6 +60,18 @@ const testScenarios: TestScenario[] = [
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
+    appName: 'vite-react-ts-swc',
+    description: 'should update a private Vite app with React & TypeScript & SWC',
+    options: { access: 'private', isNew: false },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
+    appName: 'vite-react-ts-swc',
+    description: 'should update a public Vite app with React & TypeScript & SWC',
+    options: { access: 'public', isNew: false, npmToken: 'token' },
+    setup: (testDir, appName, options) => updateApp(appName, testDir, options),
+  },
+  {
     appName: 'vite-preact-ts',
     description: 'should update a private Vite app with Preact & TypeScript',
     options: { access: 'private', isNew: false },
