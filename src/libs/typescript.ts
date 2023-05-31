@@ -7,6 +7,7 @@ import type { TsConfigJson } from 'type-fest'
 import { getPkgTsConfig } from './jsdelivr'
 
 export const PRESERVED_TS_COMPILER_OPTIONS = new Set<keyof TsConfigJson.CompilerOptions>([
+  'allowImportingTsExtensions',
   'allowJs',
   'jsx',
   'jsxFactory',
