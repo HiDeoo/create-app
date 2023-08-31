@@ -79,7 +79,7 @@ async function copyTemplates(appName: string, appPath: string, access: AppOption
       const compiledTemplate = compileTemplate(templateContent)
 
       return writeAppFile(appPath, destination, compiledTemplate)
-    })
+    }),
   )
 }
 
@@ -166,7 +166,7 @@ async function prettify(appPath: string, isNew: boolean) {
     await runPackageManagerCommand(appPath, ['eslint', '.', '--fix'])
   }
 
-  return runPackageManagerCommand(appPath, ['prettier', '-w', '--loglevel', 'silent', '.'])
+  return runPackageManagerCommand(appPath, ['prettier', '-w', '--log-level', 'silent', '.'])
 }
 
 async function updateGitHubRepositorySettings(appName: string) {
@@ -186,7 +186,7 @@ async function updateGitHubRepositorySettings(appName: string) {
 async function addGitHubRepositorySecrets(
   appName: string,
   access: AppOptions['access'],
-  npmToken: AppOptions['npmToken']
+  npmToken: AppOptions['npmToken'],
 ) {
   if (access !== 'public' || !npmToken || npmToken.length === 0) {
     return

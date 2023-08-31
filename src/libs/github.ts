@@ -15,7 +15,7 @@ export async function isGitHubRepository(repoIdentifier: RepositoryIdentifier) {
 export async function updateRepositorySetting(
   repoIdentifier: RepositoryIdentifier,
   key: string,
-  value: string | number | boolean
+  value: string | number | boolean,
 ) {
   try {
     await runCommand([

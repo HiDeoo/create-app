@@ -211,7 +211,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     }
 
     expect(filePkg.scripts?.['prepublishOnly']).toBe(
-      options.access === 'public' ? templatePkg.scripts?.['prepublishOnly'] : undefined
+      options.access === 'public' ? templatePkg.scripts?.['prepublishOnly'] : undefined,
     )
 
     expect(filePkg.sideEffects).toBe(templatePkg.sideEffects)
@@ -240,7 +240,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     assert(templateScripts, 'package.json template should have scripts.')
 
     expect(Object.keys(fileScripts).filter((key) => templateScripts[key] !== undefined)).toEqual(
-      Object.keys(templateScripts).filter((key) => fileScripts[key] !== undefined)
+      Object.keys(templateScripts).filter((key) => fileScripts[key] !== undefined),
     )
   })
 
@@ -293,7 +293,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     test('should run only necessary commands', () => {
       expect(spawnMock).toHaveBeenCalledTimes(
-        7 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0)
+        7 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0),
       )
     })
 
@@ -321,7 +321,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should prettify the app', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--loglevel', 'silent', '.'])
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--log-level', 'silent', '.'])
     })
 
     test('should check if the repository exists on GitHub', () => {
@@ -435,7 +435,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
         if (typeof option === 'object') {
           expect(fileTsConfig.compilerOptions?.[compilerOption]).toEqual(
-            fixtureTsConfig.compilerOptions?.[compilerOption]
+            fixtureTsConfig.compilerOptions?.[compilerOption],
           )
         } else {
           expect(fileTsConfig.compilerOptions?.[compilerOption]).toBe(fixtureTsConfig.compilerOptions?.[compilerOption])
@@ -520,7 +520,7 @@ function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
 function expectPersistedDependencies(
   oldDeps?: PackageJson.Dependency,
   newDeps?: PackageJson.Dependency,
-  invalidDeps?: string[]
+  invalidDeps?: string[],
 ) {
   if (!oldDeps || !newDeps) {
     return
@@ -528,8 +528,8 @@ function expectPersistedDependencies(
 
   expect(Object.keys(newDeps)).toEqual(
     expect.arrayContaining(
-      Object.keys(oldDeps).filter((oldDep) => ![...PKG_INVALID_DEPENDENCIES, ...(invalidDeps ?? [])].includes(oldDep))
-    )
+      Object.keys(oldDeps).filter((oldDep) => ![...PKG_INVALID_DEPENDENCIES, ...(invalidDeps ?? [])].includes(oldDep)),
+    ),
   )
 }
 
@@ -551,7 +551,7 @@ function expectCompiledTemplate(template: string, content: string, variables: Te
         const value = variables[variable].toString()
 
         return value.length === 0 ? '' : `${spacing}${value}`
-      })
+      }),
   ).toBe(content)
 }
 

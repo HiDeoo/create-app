@@ -57,8 +57,8 @@ export function logError(error: unknown) {
   }
 }
 
-export async function promptForName(): Promise<string> {
-  const { name } = await prompts({
+export async function promptForName() {
+  const nameAnswer = await prompts({
     initial: path.basename(process.cwd()),
     message: 'App name:',
     name: 'name',
@@ -69,11 +69,11 @@ export async function promptForName(): Promise<string> {
       'Invalid app name, please check https://docs.npmjs.com/cli/v8/configuring-npm/package-json#name',
   })
 
-  return name
+  return nameAnswer.name as string
 }
 
-export async function promptForDirectory(name: string): Promise<string> {
-  const { newDirectory } = await prompts({
+export async function promptForDirectory(name: string) {
+  const newDirectoryAnswer = await prompts({
     active: `new '${name}' directory`,
     inactive: 'current directory',
     message: 'App directory:',
@@ -82,11 +82,11 @@ export async function promptForDirectory(name: string): Promise<string> {
     type: 'toggle',
   })
 
-  return path.resolve(newDirectory ? name : '.')
+  return path.resolve((newDirectoryAnswer.newDirectory as boolean) ? name : '.')
 }
 
 export async function promptForYesNo(message: string): Promise<boolean> {
-  const { response } = await prompts({
+  const responseAnswer = await prompts({
     active: 'no',
     inactive: 'yes',
     message: message,
@@ -95,11 +95,11 @@ export async function promptForYesNo(message: string): Promise<boolean> {
     type: 'toggle',
   })
 
-  return !response
+  return !responseAnswer.response
 }
 
 export async function promptForConfirmation(message: string): Promise<void> {
-  const { confirmed } = await prompts({
+  const confirmedAnswer = await prompts({
     initial: true,
     message: message,
     name: 'confirmed',
@@ -107,20 +107,20 @@ export async function promptForConfirmation(message: string): Promise<void> {
     type: 'confirm',
   })
 
-  if (!confirmed) {
+  if (!confirmedAnswer.confirmed) {
     throw new UserAbortError()
   }
 }
 
-export async function promptForToken(message: string): Promise<string> {
-  const { token } = await prompts({
+export async function promptForToken(message: string) {
+  const tokenAnswer = await prompts({
     message: message,
     name: 'token',
     onState: onPromptStateChange,
     type: 'password',
   })
 
-  return token
+  return tokenAnswer.token as string
 }
 
 function onPromptStateChange(state: PromptState) {
