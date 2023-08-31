@@ -82,7 +82,7 @@ export async function promptForDirectory(name: string) {
     type: 'toggle',
   })
 
-  return path.resolve((newDirectoryAnswer.newDirectory as string | undefined) ?? '.')
+  return path.resolve((newDirectoryAnswer.newDirectory as boolean) ? name : '.')
 }
 
 export async function promptForYesNo(message: string): Promise<boolean> {
