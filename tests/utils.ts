@@ -58,9 +58,9 @@ export function setupTest(testName: string) {
   }
 
   async function afterTest() {
-    logStepSpy.mockRestore()
-    confirmationPromptSpy.mockRestore()
-    logStepWithProgressSpy.mockRestore()
+    logStepSpy.mockClear()
+    confirmationPromptSpy.mockClear()
+    logStepWithProgressSpy.mockClear()
 
     vi.useRealTimers()
 
