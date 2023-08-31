@@ -12,7 +12,7 @@ export function installDependencies(appPath: string, onStdout: NonNullable<ExecO
     env: { ADBLOCK: '1', DISABLE_OPENCOLLECTIVE: '1' },
     onStdout: (data) => {
       if (!data.includes('+++++')) {
-        onStdout(data.replace(/\s{2,}/g, ''))
+        onStdout(data.replaceAll(/\s{2,}/g, ''))
       }
     },
   })

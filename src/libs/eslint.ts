@@ -8,7 +8,7 @@ import merge from 'lodash.merge'
 export const UNSUPPORTED_ESLINT_CONFIG_FILENAMES = ['.eslintrc.js', '.eslintrc.cjs', '.eslintrc.yaml', '.eslintrc.yml']
 
 export function parseEslintConfig(config: string): Linter.Config {
-  return JSON.parse(config)
+  return JSON.parse(config) as Linter.Config
 }
 
 export function mergeEslintConfigs(config: Linter.Config, source: Linter.Config) {

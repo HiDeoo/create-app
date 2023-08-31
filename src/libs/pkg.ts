@@ -102,7 +102,7 @@ export async function pinPkgDependenciesToLatest(pkg: PackageJson, onPin: (name:
 }
 
 export function parsePkg(pkg: string): PackageJson {
-  return JSON.parse(pkg)
+  return JSON.parse(pkg) as PackageJson
 }
 
 export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
