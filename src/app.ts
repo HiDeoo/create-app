@@ -166,7 +166,7 @@ async function prettify(appPath: string, isNew: boolean) {
     await runPackageManagerCommand(appPath, ['eslint', '.', '--fix'])
   }
 
-  return runPackageManagerCommand(appPath, ['prettier', '-w', '--loglevel', 'silent', '.'])
+  return runPackageManagerCommand(appPath, ['prettier', '-w', '--log-level', 'silent', '.'])
 }
 
 async function updateGitHubRepositorySettings(appName: string) {

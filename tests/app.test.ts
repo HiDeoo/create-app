@@ -321,7 +321,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should prettify the app', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--loglevel', 'silent', '.'])
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--log-level', 'silent', '.'])
     })
 
     test('should check if the repository exists on GitHub', () => {
