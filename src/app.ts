@@ -79,7 +79,7 @@ async function copyTemplates(appName: string, appPath: string, access: AppOption
       const compiledTemplate = compileTemplate(templateContent)
 
       return writeAppFile(appPath, destination, compiledTemplate)
-    })
+    }),
   )
 }
 
@@ -186,7 +186,7 @@ async function updateGitHubRepositorySettings(appName: string) {
 async function addGitHubRepositorySecrets(
   appName: string,
   access: AppOptions['access'],
-  npmToken: AppOptions['npmToken']
+  npmToken: AppOptions['npmToken'],
 ) {
   if (access !== 'public' || !npmToken || npmToken.length === 0) {
     return

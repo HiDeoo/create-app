@@ -26,7 +26,7 @@ async function run() {
   }
 
   options.access = (await promptForYesNo(
-    `Public npm package? ${reset('(if public, a page to create an npm automation access token will be opened)')}`
+    `Public npm package? ${reset('(if public, a page to create an npm automation access token will be opened)')}`,
   ))
     ? 'public'
     : 'private'

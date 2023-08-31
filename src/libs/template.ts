@@ -103,7 +103,7 @@ export function compileTemplate(content: string) {
       const value = templateVariables[variableName].toString()
 
       return isConditional ? (value.length === 0 ? '' : `${conditionalSpacing}${value}`) : value
-    }
+    },
   )
 
   return compiledContent
