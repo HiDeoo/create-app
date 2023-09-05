@@ -20,12 +20,12 @@ jobs:
       ((RELEASE_PERMISSIONS))
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
         with:
           version: [[PACKAGE_MANAGER_VERSION]]
 
