@@ -26,8 +26,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: [[PACKAGE_MANAGER_VERSION]]
 
       - name: Install Node.js
         uses: actions/setup-node@v3
