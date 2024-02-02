@@ -306,12 +306,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should configure Git hooks', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER_EXECUTE, [
-        'husky',
-        'add',
-        '.husky/pre-commit',
-        'pnpx lint-staged',
-      ])
+      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER_EXECUTE, ['husky', 'init'])
     })
 
     test('should run ESLint when updating an existing app', () => {
@@ -368,12 +363,12 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         '.github/workflows/integration.yml',
         '.github/workflows/release.yml',
         '.gitignore',
+        '.husky/pre-commit',
         '.prettierignore',
         'LICENSE',
         'README.md',
         'package.json',
         'tsconfig.json',
-        '.husky/pre-commit',
         'pnpm-lock.yaml',
       ])
     })

@@ -156,7 +156,12 @@ async function install(appPath: string) {
 async function addGitHooks(appPath: string) {
   logStepWithProgress('Configuring Git hooks…')
 
-  return executePackageManagerCommand(appPath, ['husky', 'add', '.husky/pre-commit', 'pnpx lint-staged'], true)
+  await executePackageManagerCommand(appPath, ['husky', 'init'], true)
+
+  const fileName = '.husky/pre-commit'
+  const template = await getTemplateContent(getTemplatePath(fileName))
+
+  return writeAppFile(appPath, fileName, template)
 }
 
 async function prettify(appPath: string, isNew: boolean) {
@@ -236,7 +241,7 @@ async function stageBootstrapFiles(appPath: string) {
   const templatePaths = await getTemplatePaths(false)
 
   const filesToStage = templatePaths.map(({ destination }) => destination)
-  filesToStage.push('.husky/pre-commit', 'pnpm-lock.yaml')
+  filesToStage.push('pnpm-lock.yaml')
 
   await stageFiles(appPath, filesToStage)
 }

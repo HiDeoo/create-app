@@ -9,7 +9,7 @@ import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '
 import { getPkgManagerLatestVersion } from './pm'
 
 // A set of templates which will not be automatically processed and requires special handling.
-const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json'])
+const specialTemplates = new Set(['package.json', 'tsconfig.json', '.eslintrc.json', '.husky/pre-commit'])
 
 const templateVariableKeys = [
   'APP_NAME',
