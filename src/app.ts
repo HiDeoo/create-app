@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { NPM_PROVENANCE_PERMISSION, NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
-import { deleteUnsupportedEslintConfigs, mergeEslintConfigs, parseEslintConfig } from './libs/eslint'
+import { deleteUnsupportedEslintConfigs } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
   addRepositorySecret,
@@ -130,17 +130,10 @@ async function copyEslintConfig(appPath: string) {
 
   await deleteUnsupportedEslintConfigs(appPath)
 
-  const fileName = '.eslintrc.json'
-
+  const fileName = 'eslint.config.js'
   const template = await getTemplateContent(getTemplatePath(fileName))
-  const existing = (await readAppFile(appPath, fileName)) ?? '{}'
 
-  const templateEslintConfig = parseEslintConfig(template)
-  const existingEslintConfig = parseEslintConfig(existing)
-
-  const esLintConfig = mergeEslintConfigs(existingEslintConfig, templateEslintConfig)
-
-  return writeAppJsonFile(appPath, fileName, esLintConfig)
+  return writeAppFile(appPath, fileName, template)
 }
 
 async function install(appPath: string) {

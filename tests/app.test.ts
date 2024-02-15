@@ -18,7 +18,7 @@ import {
   USER_NAME,
   USER_SITE,
 } from '../src/config'
-import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES, parseEslintConfig } from '../src/libs/eslint'
+import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES } from '../src/libs/eslint'
 import { getPkgTsConfig } from '../src/libs/jsdelivr'
 import { parsePkg } from '../src/libs/pkg'
 import type { TemplateVariables } from '../src/libs/template'
@@ -359,14 +359,16 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     test('should stage new or updated files', () => {
       expectSpawnToHaveBeenNthCalledWith('git', [
         'add',
-        '.eslintrc.json',
         '.github/workflows/integration.yml',
         '.github/workflows/release.yml',
         '.gitignore',
         '.husky/pre-commit',
         '.prettierignore',
+        '.vscode/extensions.json',
+        '.vscode/settings.json',
         'LICENSE',
         'README.md',
+        'eslint.config.js',
         'package.json',
         'tsconfig.json',
         'pnpm-lock.yaml',
@@ -457,18 +459,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should add or update the .eslintrc.json file', async () => {
-    const { file, fixture } = await getTestContent(testDir, appName, '.eslintrc.json')
+  test('should add the eslint.config.js file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'eslint.config.js')
 
-    const fileEslintConfig = parseEslintConfig(file)
-    const fixtureEslintConfig = parseEslintConfig(fixture ?? '{}')
-
-    expect(Object.keys(fileEslintConfig as Record<string, unknown>).length).toBe(1)
-    expect(fileEslintConfig.extends).toEqual(expect.arrayContaining(['@hideoo']))
-
-    if (fixtureEslintConfig.extends) {
-      expect(fileEslintConfig.extends).toEqual(expect.arrayContaining([fixtureEslintConfig.extends]))
-    }
+    expectCompiledTemplate(template, file, templateVariables)
   })
 
   test('should delete unsupported ESLint configuration files', async () => {

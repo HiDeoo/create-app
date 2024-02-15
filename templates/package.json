@@ -19,8 +19,10 @@
   "keywords": [],
   "license": "MIT",
   "lint-staged": {
-    "**/*": "prettier -w -u --cache",
-    "**/*.{js,jsx,ts,tsx,cjs,mjs}": "eslint --cache --max-warnings=0"
+    "*": [
+      "prettier -w -u --cache",
+      "eslint --cache --no-warn-ignored --max-warnings=0"
+    ]
   },
   "name": "[[APP_NAME]]",
   "packageManager": "[[PACKAGE_MANAGER]]@[[PACKAGE_MANAGER_VERSION]]",
