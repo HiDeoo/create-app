@@ -40,7 +40,7 @@ Either **create** a new app from scratch (in the current directory or a new dire
 ### Tools
 
 - TypeScript with a configuration extending [@hideoo/tsconfig](https://github.com/HiDeoo/tsconfig)
-- ESLint with a configuration extending [@hideoo/eslint-config](https://github.com/HiDeoo/eslint-config)
+- ESLint with a flat configuration extending [@hideoo/eslint-config](https://github.com/HiDeoo/eslint-config)
 - Prettier with a configuration extending [@hideoo/prettier-config](https://github.com/HiDeoo/prettier-config) and a pre-filled `.prettierignore` file
 
 ### Package.json

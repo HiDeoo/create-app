@@ -14,6 +14,7 @@ export function logStep(message: string) {
     spinner.succeed()
   }
 
+  // eslint-disable-next-line no-console
   console.log(`${green('✔')} ${bold(message)}`)
 }
 

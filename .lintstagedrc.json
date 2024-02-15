@@ -1,4 +1,3 @@
 {
-  "**/*": "prettier -w -u --cache",
-  "!(fixtures/**/*)*.ts": "eslint --cache  --max-warnings=0"
+  "**/*": ["prettier -w -u --cache", "eslint --cache --no-warn-ignored --max-warnings=0"]
 }
