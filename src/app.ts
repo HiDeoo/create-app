@@ -130,7 +130,7 @@ async function copyEslintConfig(appPath: string) {
 
   await deleteUnsupportedEslintConfigs(appPath)
 
-  const fileName = 'eslint.config.js'
+  const fileName = 'eslint.config.mjs'
   const template = await getTemplateContent(getTemplatePath(fileName))
 
   return writeAppFile(appPath, fileName, template)

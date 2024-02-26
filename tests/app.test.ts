@@ -368,7 +368,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         '.vscode/settings.json',
         'LICENSE',
         'README.md',
-        'eslint.config.js',
+        'eslint.config.mjs',
         'package.json',
         'tsconfig.json',
         'pnpm-lock.yaml',
@@ -459,8 +459,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectCompiledTemplate(template, file, templateVariables)
   })
 
-  test('should add the eslint.config.js file', async () => {
-    const { file, template } = await getTestContent(testDir, appName, 'eslint.config.js')
+  test('should add the eslint.config.mjs file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'eslint.config.mjs')
 
     expectCompiledTemplate(template, file, templateVariables)
   })

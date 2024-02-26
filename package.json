@@ -38,7 +38,7 @@
     "@types/prompts": "2.4.4",
     "@types/sort-object-keys": "1.1.0",
     "@types/validate-npm-package-name": "4.0.0",
-    "eslint": "8.56.0",
+    "eslint": "8.57.0",
     "husky": "8.0.3",
     "lint-staged": "14.0.1",
     "prettier": "3.0.3",
@@ -47,7 +47,7 @@
     "unbuild": "2.0.0",
     "vitest": "0.34.3"
   },
-  "packageManager": "pnpm@7.8.0",
+  "packageManager": "pnpm@8.15.0",
   "files": [
     "cli.mjs",
     "dist",
