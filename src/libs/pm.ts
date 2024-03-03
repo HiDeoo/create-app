@@ -1,3 +1,5 @@
+import * as os from 'node:os'
+
 import { PACKAGE_MANAGER, PACKAGE_MANAGER_EXECUTE } from '../config'
 
 import { exec, type ExecOptions } from './exec'
@@ -27,7 +29,9 @@ export function executePackageManagerCommand(appPath: string, args: string[], si
 }
 
 function runPackageManager(appPath: string, args: string[], options: RunOptions = {}) {
-  return exec(options.execute ? PACKAGE_MANAGER_EXECUTE : PACKAGE_MANAGER, args, { ...options, cwd: appPath })
+  const cmdExtension = os.platform() === 'win32' ? '.cmd' : ''
+  const executable = options.execute ? PACKAGE_MANAGER_EXECUTE : PACKAGE_MANAGER
+  return exec(`${executable}${cmdExtension}`, args, { ...options, cwd: appPath })
 }
 
 interface RunOptions extends ExecOptions {
