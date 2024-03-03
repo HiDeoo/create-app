@@ -15,5 +15,5 @@ export function initGitRepository(repoPath: string) {
 }
 
 export function stageFiles(repoPath: string, files: string[]) {
-  return exec('git', ['add', ...files], { cwd: repoPath, silent: true })
+  return exec('git', ['add', ...files.sort()], { cwd: repoPath, silent: true })
 }

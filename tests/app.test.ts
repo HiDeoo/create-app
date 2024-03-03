@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process'
+import os from 'node:os'
+import path from 'node:path'
 
 import type { PackageJson } from 'type-fest'
 import * as undici from 'undici'
@@ -277,6 +279,9 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
   describe('should run various commands', () => {
     const spawnMock = vi.mocked(spawn)
+    const cmdExtension = os.platform() === 'win32' ? '.cmd' : ''
+    const packageManager = `${PACKAGE_MANAGER}${cmdExtension}`
+    const packageManagerExecute = `${PACKAGE_MANAGER_EXECUTE}${cmdExtension}`
 
     afterAll(() => {
       spawnMock.mockClear()
@@ -302,21 +307,21 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should install dependencies', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['install'])
+      expectSpawnToHaveBeenNthCalledWith(packageManager, ['install'])
     })
 
     test('should configure Git hooks', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER_EXECUTE, ['husky', 'init'])
+      expectSpawnToHaveBeenNthCalledWith(packageManagerExecute, ['husky', 'init'])
     })
 
     test('should run ESLint when updating an existing app', () => {
       if (!options.isNew) {
-        expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'eslint', '.', '--fix'])
+        expectSpawnToHaveBeenNthCalledWith(packageManager, ['exec', 'eslint', '.', '--fix'])
       }
     })
 
     test('should prettify the app', () => {
-      expectSpawnToHaveBeenNthCalledWith(PACKAGE_MANAGER, ['exec', 'prettier', '-w', '--log-level', 'silent', '.'])
+      expectSpawnToHaveBeenNthCalledWith(packageManager, ['exec', 'prettier', '-w', '--log-level', 'silent', '.'])
     })
 
     test('should check if the repository exists on GitHub', () => {
@@ -359,19 +364,19 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     test('should stage new or updated files', () => {
       expectSpawnToHaveBeenNthCalledWith('git', [
         'add',
-        '.github/workflows/integration.yml',
-        '.github/workflows/release.yml',
+        path.join('.github', 'workflows', 'integration.yml'),
+        path.join('.github', 'workflows', 'release.yml'),
         '.gitignore',
-        '.husky/pre-commit',
+        path.join('.husky', 'pre-commit'),
         '.prettierignore',
-        '.vscode/extensions.json',
-        '.vscode/settings.json',
+        path.join('.vscode', 'extensions.json'),
+        path.join('.vscode', 'settings.json'),
         'LICENSE',
         'README.md',
         'eslint.config.mjs',
         'package.json',
-        'tsconfig.json',
         'pnpm-lock.yaml',
+        'tsconfig.json',
       ])
     })
 
