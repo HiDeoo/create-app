@@ -75,7 +75,7 @@ export function setupTest(testName: string) {
 }
 
 export async function getTestDirPaths(testDir: string) {
-  const testDirPaths = await glob(path.join(testDir, '**/*'), { absolute: true, dot: true, filesOnly: true })
+  const testDirPaths = await glob('**/*', { cwd: testDir, absolute: true, dot: true, filesOnly: true })
 
   return testDirPaths.map((testDirPath) => testDirPath.replace(testDir, ''))
 }

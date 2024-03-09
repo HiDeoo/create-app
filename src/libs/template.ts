@@ -37,13 +37,13 @@ let templateVariables: TemplateVariables | undefined
 export async function getTemplatePaths(ignoreSpecialTemplates = true) {
   const templatePath = getTemplatesPath()
 
-  const allTemplatePaths = await glob(path.join(templatePath, '**/*'), { absolute: true, dot: true, filesOnly: true })
+  const allTemplatePaths = await glob('**/*', { cwd: templatePath, absolute: true, dot: true, filesOnly: true })
 
   const templates: Template[] = []
 
   for (const absolutePath of allTemplatePaths) {
     const template = {
-      destination: absolutePath.replace(`${templatePath}/`, ''),
+      destination: absolutePath.replace(`${templatePath}${path.sep}`, ''),
       source: absolutePath,
     }
 
@@ -112,7 +112,7 @@ export function compileTemplate(content: string) {
 function getTemplatesPath() {
   const dirName = path.dirname(fileURLToPath(import.meta.url))
 
-  return path.join(dirName, dirName.endsWith('src/libs') ? '../..' : '..', 'templates')
+  return path.join(dirName, dirName.endsWith(path.join('src', 'libs')) ? '../..' : '..', 'templates')
 }
 
 function isValidTemplateVariable(variable: string): variable is keyof TemplateVariables {
