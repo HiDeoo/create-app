@@ -1,5 +1,4 @@
 import { spawn } from 'node:child_process'
-import os from 'node:os'
 import path from 'node:path'
 
 import type { PackageJson } from 'type-fest'
@@ -13,7 +12,6 @@ import {
   NPM_REGISTRY_URL,
   NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
-  PACKAGE_MANAGER_EXECUTE,
   PKG_INVALID_DEPENDENCIES,
   PKG_KEYS_ORDER,
   USER_MAIL,
@@ -23,6 +21,7 @@ import {
 import { UNSUPPORTED_ESLINT_CONFIG_FILENAMES } from '../src/libs/eslint'
 import { getPkgTsConfig } from '../src/libs/jsdelivr'
 import { parsePkg } from '../src/libs/pkg'
+import { getPackageManagerBinary } from '../src/libs/pm'
 import type { TemplateVariables } from '../src/libs/template'
 import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typescript'
 
@@ -279,9 +278,6 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
   describe('should run various commands', () => {
     const spawnMock = vi.mocked(spawn)
-    const cmdExtension = os.platform() === 'win32' ? '.cmd' : ''
-    const packageManager = `${PACKAGE_MANAGER}${cmdExtension}`
-    const packageManagerExecute = `${PACKAGE_MANAGER_EXECUTE}${cmdExtension}`
 
     afterAll(() => {
       spawnMock.mockClear()
@@ -307,21 +303,28 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should install dependencies', () => {
-      expectSpawnToHaveBeenNthCalledWith(packageManager, ['install'])
+      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), ['install'])
     })
 
     test('should configure Git hooks', () => {
-      expectSpawnToHaveBeenNthCalledWith(packageManagerExecute, ['husky', 'init'])
+      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(true), ['husky', 'init'])
     })
 
     test('should run ESLint when updating an existing app', () => {
       if (!options.isNew) {
-        expectSpawnToHaveBeenNthCalledWith(packageManager, ['exec', 'eslint', '.', '--fix'])
+        expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), ['exec', 'eslint', '.', '--fix'])
       }
     })
 
     test('should prettify the app', () => {
-      expectSpawnToHaveBeenNthCalledWith(packageManager, ['exec', 'prettier', '-w', '--log-level', 'silent', '.'])
+      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), [
+        'exec',
+        'prettier',
+        '-w',
+        '--log-level',
+        'silent',
+        '.',
+      ])
     })
 
     test('should check if the repository exists on GitHub', () => {
@@ -362,22 +365,25 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     })
 
     test('should stage new or updated files', () => {
-      expectSpawnToHaveBeenNthCalledWith('git', [
-        'add',
-        path.join('.github', 'workflows', 'integration.yml'),
-        path.join('.github', 'workflows', 'release.yml'),
-        '.gitignore',
-        path.join('.husky', 'pre-commit'),
-        '.prettierignore',
-        path.join('.vscode', 'extensions.json'),
-        path.join('.vscode', 'settings.json'),
-        'LICENSE',
-        'README.md',
-        'eslint.config.mjs',
-        'package.json',
-        'pnpm-lock.yaml',
-        'tsconfig.json',
-      ])
+      expectSpawnToHaveBeenNthCalledWith(
+        'git',
+        [
+          'add',
+          '.github/workflows/integration.yml',
+          '.github/workflows/release.yml',
+          '.gitignore',
+          '.husky/pre-commit',
+          '.prettierignore',
+          '.vscode/extensions.json',
+          '.vscode/settings.json',
+          'LICENSE',
+          'README.md',
+          'eslint.config.mjs',
+          'package.json',
+          'pnpm-lock.yaml',
+          'tsconfig.json',
+        ].map((filePath) => path.normalize(filePath)),
+      )
     })
 
     test('should cache jsdelivr results', () => {
