@@ -47,7 +47,7 @@ async function run() {
   logStep(green('Done!'))
 }
 
-run().catch((error) => {
+run().catch((error: unknown) => {
   logError(error)
 
   process.exit(1)

@@ -394,7 +394,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         const url = call[0]
         assert(typeof url === 'string', 'Fetch request info is not a valid URL.')
 
-        const matches = url.match(jsdelivrRequestRegExp)
+        const matches = jsdelivrRequestRegExp.exec(url)
 
         if (matches) {
           const pkg = matches.groups?.['pkg']
