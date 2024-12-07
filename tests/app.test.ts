@@ -174,10 +174,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     expect(filePkg.description).toBe(templatePkg.description)
 
-    expectPinnedDependenciesToLatest(filePkg.dependencies)
+    expectDependenciesToLatest(filePkg.dependencies)
     expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies, ['typescript'])
 
-    expectPinnedDependenciesToLatest(filePkg.devDependencies)
+    expectDependenciesToLatest(filePkg.devDependencies)
     expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
 
     assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
@@ -507,13 +507,13 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   })
 })
 
-function expectPinnedDependenciesToLatest(deps?: PackageJson.Dependency) {
+function expectDependenciesToLatest(deps?: PackageJson.Dependency) {
   if (!deps) {
     return
   }
 
   for (const version of Object.values(deps)) {
-    expect(version).toBe('la.te.st')
+    expect(version).toBe('^la.te.st')
   }
 }
 
