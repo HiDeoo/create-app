@@ -10,7 +10,7 @@ import {
   type RepositoryIdentifier,
   updateRepositorySetting,
 } from './libs/github'
-import { mergePkgs, parsePkg, pinPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
+import { mergePkgs, parsePkg, setPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import {
@@ -95,7 +95,7 @@ async function copyPkg(appPath: string, access: AppOptions['access']) {
   const existingPkg = parsePkg(existing)
 
   let pkg = mergePkgs(existingPkg, templatePkg)
-  pkg = await pinPkgDependenciesToLatest(pkg, (name) => {
+  pkg = await setPkgDependenciesToLatest(pkg, (name) => {
     addDetails(name)
   })
   pkg = setPkgAccess(pkg, access)

@@ -7,7 +7,7 @@ export function exec(command: string, args: string[], options: ExecOptions = {})
     const child = spawn(command, args, {
       cwd: options.cwd,
       env: { ...process.env, ...options.env },
-      stdio: options.silent ?? options.onStdout ? [] : 'inherit',
+      stdio: (options.silent ?? options.onStdout) ? [] : 'inherit',
     })
 
     const errorMessage = `Unable to run command: '${command} ${args.join(' ')}'.`

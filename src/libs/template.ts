@@ -25,6 +25,7 @@ const templateVariableKeys = [
   'YEAR',
 ] as const satisfies readonly TemplateVariableKey[]
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const userDefinedTemplateVariableKeys = [
   'APP_NAME',
   'RELEASE_PERMISSIONS',
@@ -132,13 +133,12 @@ interface Template {
   source: string
 }
 
-export type TemplateVariables = {
-  [key in (typeof templateVariableKeys)[number]]: TemplateVariableValue
-}
+export type TemplateVariables = Record<(typeof templateVariableKeys)[number], TemplateVariableValue>
 
-export type UserDefinedTemplateVariables = {
-  [key in (typeof userDefinedTemplateVariableKeys)[number]]: TemplateVariableValue
-}
+export type UserDefinedTemplateVariables = Record<
+  (typeof userDefinedTemplateVariableKeys)[number],
+  TemplateVariableValue
+>
 
 type TemplateVariableKey = string
 type TemplateVariableValue = string | number
