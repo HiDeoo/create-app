@@ -1,3 +1,0 @@
-{
-  "**/*": ["prettier -w -u --cache", "eslint --cache --no-warn-ignored --max-warnings=0"]
-}
