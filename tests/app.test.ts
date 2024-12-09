@@ -161,7 +161,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(testDirPaths).toEqual(expect.arrayContaining(expectedPaths))
   })
 
-  test('should add the license file', async () => {
+    test('should add the license file', async () => {
     const { file, template } = await getTestContent(testDir, appName, 'LICENSE')
 
     expectCompiledTemplate(template, file, templateVariables)
