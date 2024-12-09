@@ -109,6 +109,13 @@ vi.mock('node:child_process', async () => {
           listener(0)
         }
       }),
+      stdout: {
+        on: vi.fn().mockImplementation((event: string, listener: (data: string) => void) => {
+          if (event === 'data') {
+            listener('{ "sha": "latest" }')
+          }
+        }),
+      },
     }),
   }
 })
@@ -125,6 +132,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     templateVariables = {
       APP_NAME: appName,
+      AUTOFIX_HASH: 'latest',
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
@@ -302,12 +310,17 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       expectSpawnToHaveBeenNthCalledWith('git', ['rev-parse', '--is-inside-work-tree'])
     })
 
-    test('should install dependencies', () => {
-      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), ['install'])
+    test('should fetch the autofix latest commit hash', () => {
+      expectSpawnToHaveBeenNthCalledWith('gh', [
+        'api',
+        '-H',
+        'Accept: application/vnd.github+json',
+        `/repos/autofix-ci/action/commits/main`,
+      ])
     })
 
-    test('should configure Git hooks', () => {
-      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(true), ['husky', 'init'])
+    test('should install dependencies', () => {
+      expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), ['install'])
     })
 
     test('should run ESLint when updating an existing app', () => {
@@ -369,10 +382,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         'git',
         [
           'add',
+          '.github/workflows/autofix.yml',
           '.github/workflows/integration.yml',
           '.github/workflows/release.yml',
           '.gitignore',
-          '.husky/pre-commit',
           '.prettierignore',
           '.vscode/extensions.json',
           '.vscode/settings.json',
@@ -492,6 +505,12 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     const { file, template } = await getTestContent(testDir, appName, '.gitignore')
 
     expect(file).toBe(template)
+  })
+
+  test('should add the autofix workflow', async () => {
+    const { file, template } = await getTestContent(testDir, appName, '.github/workflows/autofix.yml')
+
+    expectCompiledTemplate(template, file, templateVariables)
   })
 
   test('should add the integration workflow', async () => {

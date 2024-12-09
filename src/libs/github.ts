@@ -42,10 +42,31 @@ export async function addRepositorySecret(repoIdentifier: RepositoryIdentifier, 
   }
 }
 
+export async function getRepositoryLastCommitHash(repoIdentifier: RepositoryIdentifier) {
+  try {
+    const stdout = await runCommand([
+      'api',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/commits/main`,
+    ])
+
+    return (JSON.parse(stdout) as { sha: string }).sha
+  } catch (error) {
+    throw errorWithCause(`Unable to get the last commit hash of '${repoIdentifier}'.`, error)
+  }
+}
+
 function runCommand(args: string[]) {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
+    let stdout = ''
+
     const child = spawn('gh', args, {
       stdio: [],
+    })
+
+    child.stdout.on('data', (data) => {
+      stdout += String(data)
     })
 
     child.on('error', (error) => {
@@ -59,7 +80,7 @@ function runCommand(args: string[]) {
         return
       }
 
-      resolve()
+      resolve(stdout)
     })
   })
 }

@@ -24,10 +24,6 @@ export function runPackageManagerCommand(appPath: string, args: string[], silent
   return runPackageManager(appPath, ['exec', ...args], { silent: !!silent })
 }
 
-export function executePackageManagerCommand(appPath: string, args: string[], silent?: boolean) {
-  return runPackageManager(appPath, args, { execute: true, silent: !!silent })
-}
-
 export function getPackageManagerBinary(execute?: RunOptions['execute']) {
   const executable = execute ? PACKAGE_MANAGER_EXECUTE : PACKAGE_MANAGER
   const extension = os.platform() === 'win32' ? '.cmd' : ''

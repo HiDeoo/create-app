@@ -46,7 +46,8 @@ Either **create** a new app from scratch (in the current directory or a new dire
 ### Package.json
 
 - Pre-fill most common fields
-- Add a `lint` script to lint, ensure formatting and typecheck the code
+- Add a `lint` script to lint and typecheck the code
+- Add a `format` script to ensure formatting
 - Enforce the package manager to the latest version of pnpm (reused in GitHub Actions)
 - Enforce a minimum Node.js version (reused in GitHub Actions)
 - Optionally add the configuration for publishing to npm
@@ -65,13 +66,13 @@ Either **create** a new app from scratch (in the current directory or a new dire
 ### Git
 
 - Initialize a new Git repository if needed
-- Setup a pre-commit hook to run Prettier on all staged files and ESLint on supported staged files
 - If a repository matching the name of the app exists on GitHub, enable the GitHub repository setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
 - Stage _added_ or _updated_ files during the creation of the app at the end of the process
 
 ### GitHub Actions
 
-- Create an integration workflow to lint, ensure formatting, typecheck and test the project for every push on the main branch or pull request
+- Create an autofix workflow to ensure formatting and using [autofix.ci](https://autofix.ci/) to automatically update pull requests if needed
+- Create an integration workflow to lint, typecheck and test the project for every push on the main branch or pull request
 - Add a customizable release workflow that can be triggered by bumping the version number in a commit with a tag matching the new version number (or just running `pnpx bumpp`)
   - The release workflow will fail if the integration workflow fails
   - A new release containing the changelog will be published on GitHub based on [conventional commits](https://www.conventionalcommits.org)

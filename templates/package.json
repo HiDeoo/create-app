@@ -7,8 +7,6 @@
     "@hideoo/prettier-config": "…",
     "@hideoo/tsconfig": "…",
     "eslint": "…",
-    "husky": "…",
-    "lint-staged": "…",
     "prettier": "…",
     "typescript": "…"
   },
@@ -18,12 +16,6 @@
   "homepage": "https://github.com/[[USER_NAME]]/[[APP_NAME]]",
   "keywords": [],
   "license": "MIT",
-  "lint-staged": {
-    "*": [
-      "prettier -w -u --cache",
-      "eslint --cache --no-warn-ignored --max-warnings=0"
-    ]
-  },
   "name": "[[APP_NAME]]",
   "packageManager": "[[PACKAGE_MANAGER]]@[[PACKAGE_MANAGER_VERSION]]",
   "prettier": "@hideoo/prettier-config",
@@ -37,8 +29,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test implemented.\" && exit 1",
-    "lint": "prettier -c --cache . && eslint . --cache --max-warnings=0 && tsc --noEmit",
-    "prepare": "husky install",
+    "lint": "eslint . --cache --max-warnings=0 && tsc --noEmit",
+    "format": "prettier -w --cache --ignore-unknown .",
     "prepublishOnly": "pnpm build"
   },
   "sideEffects": false,
