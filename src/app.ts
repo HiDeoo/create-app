@@ -11,7 +11,7 @@ import {
   updateRepositorySetting,
 } from './libs/github'
 import { mergePkgs, parsePkg, setPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
-import { executePackageManagerCommand, installDependencies, runPackageManagerCommand } from './libs/pm'
+import { installDependencies, runPackageManagerCommand } from './libs/pm'
 import { logStepWithProgress, promptForConfirmation } from './libs/prompt'
 import {
   compileTemplate,
@@ -44,10 +44,10 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
   await copyEslintConfig(appPath)
+  await copyAutofixWorkflow(appPath)
 
   await install(appPath)
 
-  await addGitHooks(appPath)
   await prettify(appPath, options.isNew)
 
   await updateGitHubRepositorySettings(appName)
@@ -136,6 +136,16 @@ async function copyEslintConfig(appPath: string) {
   return writeAppFile(appPath, fileName, template)
 }
 
+async function copyAutofixWorkflow(appPath: string) {
+  logStepWithProgress('Setting up autofix…')
+
+  const filePath = '.github/workflows/autofix.yml'
+  const template = await getTemplateContent(getTemplatePath(filePath))
+  const compiledTemplate = compileTemplate(template)
+
+  return writeAppFile(appPath, filePath, compiledTemplate)
+}
+
 async function install(appPath: string) {
   const { addDetails, removeDetails } = logStepWithProgress('Installing dependencies…')
 
@@ -144,17 +154,6 @@ async function install(appPath: string) {
   })
 
   removeDetails()
-}
-
-async function addGitHooks(appPath: string) {
-  logStepWithProgress('Configuring Git hooks…')
-
-  await executePackageManagerCommand(appPath, ['husky', 'init'], true)
-
-  const fileName = '.husky/pre-commit'
-  const template = await getTemplateContent(getTemplatePath(fileName))
-
-  return writeAppFile(appPath, fileName, template)
 }
 
 async function prettify(appPath: string, isNew: boolean) {
