@@ -13,6 +13,7 @@
     "test": "vitest",
     "lint": "eslint . --cache --max-warnings=0 && tsc --noEmit",
     "format": "prettier -w --cache --ignore-unknown .",
+    "version": "pnpm changeset version && pnpm i --no-frozen-lockfile",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
@@ -29,6 +30,8 @@
     "validate-npm-package-name": "^6.0.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.10",
     "@hideoo/eslint-config": "^4.0.0",
     "@hideoo/prettier-config": "^2.0.0",
     "@hideoo/tsconfig": "^2.0.1",
@@ -53,7 +56,8 @@
     "templates/.gitignore"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "sideEffects": false,
   "engines": {
