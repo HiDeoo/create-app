@@ -116,6 +116,13 @@ export function setPkgAccess(pkg: PackageJson, access: AppOptions['access']) {
   } else {
     delete pkg.publishConfig
     delete pkg.scripts?.['prepublishOnly']
+    delete pkg.scripts?.['version']
+
+    for (const devDependency of Object.keys(pkg.devDependencies ?? {})) {
+      if (devDependency.startsWith('@changesets/')) {
+        delete pkg.devDependencies?.[devDependency]
+      }
+    }
   }
 
   return pkg

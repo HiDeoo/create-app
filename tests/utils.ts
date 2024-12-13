@@ -86,20 +86,27 @@ export async function getExpectedPaths() {
   return expectedPaths.map((expectedPath) => expectedPath.replace(path.join(__dirname, '../templates'), ''))
 }
 
-export async function getTestContent(testDir: string, appName: string, filePath: string) {
-  const file = await fs.readFile(path.join(testDir, filePath), { encoding: 'utf8' })
+export async function getTestContent(
+  testDir: string,
+  appName: string,
+  filePath: string | { file: string; template: string },
+) {
+  const resolvedFilePath = typeof filePath === 'string' ? filePath : filePath.file
+  const resolvedTemplatePath = typeof filePath === 'string' ? filePath : filePath.template
+
+  const file = await fs.readFile(path.join(testDir, resolvedFilePath), { encoding: 'utf8' })
 
   let fixture: string | undefined
   let template = ''
 
   try {
-    template = await fs.readFile(path.join('templates', filePath), { encoding: 'utf8' })
+    template = await fs.readFile(path.join('templates', resolvedTemplatePath), { encoding: 'utf8' })
   } catch {
     //
   }
 
   try {
-    fixture = await fs.readFile(path.join('fixtures', appName, filePath), { encoding: 'utf8' })
+    fixture = await fs.readFile(path.join('fixtures', appName, resolvedFilePath), { encoding: 'utf8' })
   } catch {
     //
   }

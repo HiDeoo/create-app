@@ -8,9 +8,6 @@ import { afterAll, assert, beforeAll, describe, expect, test, vi } from 'vitest'
 import { type AppOptions, createApp, updateApp } from '../src/app'
 import {
   NODE_VERSION,
-  NPM_PROVENANCE_PERMISSION,
-  NPM_REGISTRY_URL,
-  NPM_RELEASE_STEP,
   PACKAGE_MANAGER,
   PKG_INVALID_DEPENDENCIES,
   PKG_KEYS_ORDER,
@@ -136,10 +133,8 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
-      RELEASE_PERMISSIONS: options.access === 'public' ? NPM_PROVENANCE_PERMISSION : '',
-      RELEASE_REGISTRY_URL: options.access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
-      RELEASE_STEP: options.access === 'public' ? NPM_RELEASE_STEP : '',
       USER_NAME,
+      USER_NAME_LC: USER_NAME.toLowerCase(),
       USER_MAIL,
       USER_SITE,
       YEAR: new Date().getFullYear(),
@@ -278,6 +273,30 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     }
   })
 
+  test('should install changesets dependencies if needed', async () => {
+    const { file } = await getTestContent(testDir, appName, 'package.json')
+
+    const fileDevDependencies = parsePkg(file).devDependencies
+    assert(fileDevDependencies, 'package.json should have dev dependencies.')
+
+    if (options.access === 'public') {
+      expect(Object.keys(fileDevDependencies).some((key) => !key.startsWith('@changesets/'))).toBe(true)
+    } else {
+      expect(Object.keys(fileDevDependencies).every((key) => !key.startsWith('@changesets/'))).toBe(true)
+    }
+  })
+
+  test('should copy changesets directory if needed', async () => {
+    const fileName = '.changeset/config.json'
+
+    if (options.access === 'public') {
+      const { file, template } = await getTestContent(testDir, appName, fileName)
+      expectCompiledTemplate(template, file, templateVariables)
+    } else {
+      await expect(getTestContent(testDir, appName, fileName)).rejects.toThrow()
+    }
+  })
+
   test('should add the readme file', async () => {
     const { file, template } = await getTestContent(testDir, appName, 'README.md')
 
@@ -382,6 +401,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         'git',
         [
           'add',
+          ...(options.access === 'public' ? ['.changeset/README.md', '.changeset/config.json'] : []),
           '.github/workflows/autofix.yml',
           '.github/workflows/integration.yml',
           '.github/workflows/release.yml',
@@ -520,7 +540,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   })
 
   test('should add the release workflow', async () => {
-    const { file, template } = await getTestContent(testDir, appName, '.github/workflows/release.yml')
+    const { file, template } = await getTestContent(testDir, appName, {
+      file: '.github/workflows/release.yml',
+      template: `.github/workflows/release-${options.access === 'private' ? 'custom' : 'changesets'}.yml`,
+    })
 
     expectCompiledTemplate(template, file, templateVariables)
   })

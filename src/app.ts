@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { NPM_PROVENANCE_PERMISSION, NPM_REGISTRY_URL, NPM_RELEASE_STEP, USER_NAME } from './config'
+import { USER_NAME } from './config'
 import { deleteUnsupportedEslintConfigs } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
@@ -40,11 +40,13 @@ export async function createApp(appName: string, appPath: string, options: AppOp
 async function bootstrapApp(appName: string, appPath: string, options: AppOptions) {
   await setupGitRepository(appPath)
 
-  await copyTemplates(appName, appPath, options.access)
+  await copyTemplates(appName, appPath)
   await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
   await copyEslintConfig(appPath)
   await copyAutofixWorkflow(appPath)
+  await copyReleaseWorkflow(appPath, options.access)
+  await copyChangesetsDirectory(appPath, options.access)
 
   await install(appPath)
 
@@ -53,7 +55,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await updateGitHubRepositorySettings(appName)
   await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
 
-  await stageBootstrapFiles(appPath)
+  await stageBootstrapFiles(appPath, options.access)
 }
 
 async function setupGitRepository(appPath: string) {
@@ -66,10 +68,10 @@ async function setupGitRepository(appPath: string) {
   }
 }
 
-async function copyTemplates(appName: string, appPath: string, access: AppOptions['access']) {
+async function copyTemplates(appName: string, appPath: string) {
   logStepWithProgress('Copying templates…')
 
-  await setTemplateVariables(getUserDefinedTemplateVariables(appName, access))
+  await setTemplateVariables(getUserDefinedTemplateVariables(appName))
 
   const templatePaths = await getTemplatePaths()
 
@@ -146,6 +148,34 @@ async function copyAutofixWorkflow(appPath: string) {
   return writeAppFile(appPath, filePath, compiledTemplate)
 }
 
+async function copyReleaseWorkflow(appPath: string, access: AppOptions['access']) {
+  logStepWithProgress('Setting up release workflow…')
+
+  const filePath = '.github/workflows/release.yml'
+  const templateFilePath = `.github/workflows/release-${access === 'public' ? 'changesets' : 'custom'}.yml`
+  const template = await getTemplateContent(getTemplatePath(templateFilePath))
+  const compiledTemplate = compileTemplate(template)
+
+  return writeAppFile(appPath, filePath, compiledTemplate)
+}
+
+async function copyChangesetsDirectory(appPath: string, access: AppOptions['access']) {
+  if (access !== 'public') return
+
+  logStepWithProgress('Setting up Changesets…')
+
+  let filePath = '.changeset/config.json'
+  let template = await getTemplateContent(getTemplatePath(filePath))
+  const compiledTemplate = compileTemplate(template)
+
+  await writeAppFile(appPath, filePath, compiledTemplate)
+
+  filePath = '.changeset/README.md'
+  template = await getTemplateContent(getTemplatePath(filePath))
+
+  return writeAppFile(appPath, filePath, template)
+}
+
 async function install(appPath: string) {
   const { addDetails, removeDetails } = logStepWithProgress('Installing dependencies…')
 
@@ -218,21 +248,29 @@ function ensureDirectory(dirPath: string) {
   return fs.mkdir(dirPath, { recursive: true })
 }
 
-function getUserDefinedTemplateVariables(appName: string, access: AppOptions['access']): UserDefinedTemplateVariables {
+function getUserDefinedTemplateVariables(appName: string): UserDefinedTemplateVariables {
   return {
     APP_NAME: appName,
-    RELEASE_PERMISSIONS: access === 'public' ? NPM_PROVENANCE_PERMISSION : '',
-    RELEASE_REGISTRY_URL: access === 'public' ? `registry-url: '${NPM_REGISTRY_URL}'` : '',
-    RELEASE_STEP: access === 'public' ? NPM_RELEASE_STEP : '',
   }
 }
 
-async function stageBootstrapFiles(appPath: string) {
+async function stageBootstrapFiles(appPath: string, access: AppOptions['access']) {
   logStepWithProgress('Tying up a few loose ends…')
 
   const templatePaths = await getTemplatePaths(false)
 
-  const filesToStage = templatePaths.map(({ destination }) => destination)
+  const filesToStage = templatePaths
+    .filter(({ destination }) => {
+      if (destination === '.github/workflows/release-changesets.yml') return false
+      if (access !== 'public' && destination.startsWith('.changeset/')) return false
+
+      return true
+    })
+    .map(({ destination }) => {
+      if (destination === '.github/workflows/release-custom.yml') return destination.replace('-custom.yml', '.yml')
+
+      return destination
+    })
   filesToStage.push('pnpm-lock.yaml')
 
   await stageFiles(appPath, filesToStage)

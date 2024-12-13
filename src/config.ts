@@ -7,14 +7,6 @@ export const NODE_VERSION = 18
 export const PACKAGE_MANAGER = 'pnpm'
 export const PACKAGE_MANAGER_EXECUTE = 'pnpx'
 
-export const NPM_REGISTRY_URL = 'https://registry.npmjs.org'
-export const NPM_PROVENANCE_PERMISSION = 'id-token: write'
-export const NPM_RELEASE_STEP = `- name: Publish
-        run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true`
-
 export const PKG_INVALID_DEPENDENCIES = [
   '@typescript-eslint/eslint-plugin',
   '@typescript-eslint/parser',
