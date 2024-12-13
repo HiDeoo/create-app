@@ -15,6 +15,10 @@ const specialTemplates = new Set([
   'tsconfig.json',
   'eslint.config.mjs',
   '.github/workflows/autofix.yml',
+  '.github/workflows/release-changesets.yml',
+  '.github/workflows/release-custom.yml',
+  '.changeset/config.json',
+  '.changeset/README.md',
 ])
 
 const templateVariableKeys = [
@@ -23,22 +27,15 @@ const templateVariableKeys = [
   'PACKAGE_MANAGER',
   'PACKAGE_MANAGER_VERSION',
   'NODE_VERSION',
-  'RELEASE_PERMISSIONS',
-  'RELEASE_REGISTRY_URL',
-  'RELEASE_STEP',
   'USER_MAIL',
   'USER_NAME',
+  'USER_NAME_LC',
   'USER_SITE',
   'YEAR',
 ] as const satisfies readonly TemplateVariableKey[]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const userDefinedTemplateVariableKeys = [
-  'APP_NAME',
-  'RELEASE_PERMISSIONS',
-  'RELEASE_REGISTRY_URL',
-  'RELEASE_STEP',
-] as const satisfies readonly (typeof templateVariableKeys)[number][]
+const userDefinedTemplateVariableKeys = ['APP_NAME'] as const satisfies readonly (typeof templateVariableKeys)[number][]
 
 let templateVariables: TemplateVariables | undefined
 
@@ -92,10 +89,8 @@ export async function setTemplateVariables(variables: UserDefinedTemplateVariabl
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
-    RELEASE_PERMISSIONS: variables.RELEASE_PERMISSIONS,
-    RELEASE_REGISTRY_URL: variables.RELEASE_REGISTRY_URL,
-    RELEASE_STEP: variables.RELEASE_STEP,
     USER_NAME,
+    USER_NAME_LC: USER_NAME.toLowerCase(),
     USER_MAIL,
     USER_SITE,
     YEAR: new Date().getFullYear(),

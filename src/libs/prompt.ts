@@ -58,6 +58,11 @@ export function logError(error: unknown) {
   }
 }
 
+export function logMessage(message: string) {
+  // eslint-disable-next-line no-console
+  console.log(bold(message))
+}
+
 export async function promptForName() {
   const nameAnswer = await prompts({
     initial: path.basename(process.cwd()),

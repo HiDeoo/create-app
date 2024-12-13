@@ -73,10 +73,14 @@ Either **create** a new app from scratch (in the current directory or a new dire
 
 - Create an autofix workflow to ensure formatting and using [autofix.ci](https://autofix.ci/) to automatically update pull requests if needed
 - Create an integration workflow to lint, typecheck and test the project for every push on the main branch or pull request
-- Add a customizable release workflow that can be triggered by bumping the version number in a commit with a tag matching the new version number (or just running `pnpx bumpp`)
-  - The release workflow will fail if the integration workflow fails
-  - A new release containing the changelog will be published on GitHub based on [conventional commits](https://www.conventionalcommits.org)
-  - Optionally, if the app is a public npm package, a webpage to create a new npm automation access token will be opened during the installation in order to automatically add the new token as a secret to the repository matching the name of the app on GitHub if it exists. The release workflow will also be modified to publish the package with [provenance](https://github.blog/2023-04-19-introducing-npm-package-provenance) to the npm registry.
+- Add a customizable release workflow
+  - For public npm packages:
+    - Use [Changesets](https://github.com/changesets/changesets) to manage versioning and changelogs
+    - A webpage to create a new npm automation access token will be opened during the installation in order to automatically add the new token as a secret to the repository matching the name of the app on GitHub if it exists
+    - The released package(s) will be published with [provenance](https://github.blog/2023-04-19-introducing-npm-package-provenance) to the npm registry
+  - For other projects:
+    - The release workflow can be triggered by bumping the version number in a commit with a tag matching the new version number (or just running `pnpx bumpp`)
+    - A new release containing the changelog will be published on GitHub based on [conventional commits](https://www.conventionalcommits.org)
 
 ## License
 

@@ -3,6 +3,8 @@
   "bugs": "https://github.com/[[USER_NAME]]/[[APP_NAME]]/issues",
   "description": "",
   "devDependencies": {
+    "@changesets/changelog-github": "…",
+    "@changesets/cli": "…",
     "@hideoo/eslint-config": "…",
     "@hideoo/prettier-config": "…",
     "@hideoo/tsconfig": "…",
@@ -21,7 +23,8 @@
   "prettier": "@hideoo/prettier-config",
   "private": true,
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": {
     "url": "https://github.com/[[USER_NAME]]/[[APP_NAME]].git",
@@ -31,6 +34,7 @@
     "test": "echo \"Error: no test implemented.\" && exit 1",
     "lint": "eslint . --cache --max-warnings=0 && tsc --noEmit",
     "format": "prettier -w --cache --ignore-unknown .",
+    "version": "pnpm changeset version && pnpm i --no-frozen-lockfile",
     "prepublishOnly": "pnpm build"
   },
   "sideEffects": false,

@@ -1,9 +1,17 @@
-import { green, reset } from 'kolorist'
+import { green, reset, yellow } from 'kolorist'
 
 import { type AppOptions, createApp, updateApp } from './app'
 import { openNewNpmTokenPage } from './libs/npm'
 import { cwdContainsPkg } from './libs/pkg'
-import { logError, logStep, promptForDirectory, promptForName, promptForToken, promptForYesNo } from './libs/prompt'
+import {
+  logError,
+  logMessage,
+  logStep,
+  promptForDirectory,
+  promptForName,
+  promptForToken,
+  promptForYesNo,
+} from './libs/prompt'
 
 async function run() {
   const options: AppOptions = { access: 'private', isNew: false }
@@ -45,6 +53,10 @@ async function run() {
   await builder(name, path, options)
 
   logStep(green('Done!'))
+
+  if (options.access === 'public') {
+    logMessage(`\n${yellow('Do not forget to give repository access to the changeset-bot.')}`)
+  }
 }
 
 run().catch((error: unknown) => {
