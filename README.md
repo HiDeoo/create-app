@@ -66,6 +66,13 @@ Either **create** a new app from scratch (in the current directory or a new dire
 ### Git
 
 - Initialize a new Git repository if needed
+- If a repository matching the name of the app exists on GitHub, update various GitHub repository settings
+  - Enable setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
+  - Enable setting to [always suggest updating pull request branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-suggestions-to-update-pull-request-branches)
+  - For public npm packages:
+    - Disable setting to [allow merge commits](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-merging-for-pull-requests)
+    - Disable setting to [allow rebase merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-rebasing-for-pull-requests)
+    - Enable setting to [allow GitHub Actions to create and approve pull requests](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)
 - If a repository matching the name of the app exists on GitHub, enable the GitHub repository setting to [automatically delete head branches after pull requests are merged](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches)
 - Stage _added_ or _updated_ files during the creation of the app at the end of the process
 

@@ -321,7 +321,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     test('should run only necessary commands', () => {
       expect(spawnMock).toHaveBeenCalledTimes(
-        7 + (options.isNew ? 0 : 1) + (options.npmToken && options.npmToken.length > 0 ? 1 : 0),
+        7 +
+          (options.isNew ? 0 : 1) +
+          (options.npmToken && options.npmToken.length > 0 ? 1 : 0) +
+          (options.access === 'public' ? 2 : 0),
       )
     })
 
@@ -378,8 +381,38 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         `/repos/${USER_NAME}/${appName}`,
         '-F',
         'delete_branch_on_merge=true',
+        '-F',
+        'allow_update_branch=true',
         '--silent',
       ])
+
+      if (options.access === 'public') {
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '--method',
+          'PATCH',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${USER_NAME}/${appName}`,
+          '-F',
+          'allow_merge_commit=false',
+          '-F',
+          'allow_rebase_merge=false',
+          '--silent',
+        ])
+
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '--method',
+          'PUT',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${USER_NAME}/${appName}/actions/permissions/workflow`,
+          '-F',
+          'can_approve_pull_request_reviews=true',
+          '--silent',
+        ])
+      }
     })
 
     test('should setup the npm automation access token if needed', () => {

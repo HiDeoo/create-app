@@ -12,10 +12,9 @@ export async function isGitHubRepository(repoIdentifier: RepositoryIdentifier) {
   }
 }
 
-export async function updateRepositorySetting(
+export async function updateRepositorySettings(
   repoIdentifier: RepositoryIdentifier,
-  key: string,
-  value: string | number | boolean,
+  keyValues: [string, string | number | boolean][],
 ) {
   try {
     await runCommand([
@@ -25,12 +24,37 @@ export async function updateRepositorySetting(
       '-H',
       'Accept: application/vnd.github+json',
       `/repos/${repoIdentifier}`,
-      '-F',
-      `${key}=${value}`,
+      ...keyValues.flatMap(([key, value]) => ['-F', `${key}=${value}`]),
       '--silent',
     ])
   } catch (error) {
-    throw errorWithCause(`Unable to update repository setting '${key}' to '${repoIdentifier}'.`, error)
+    throw errorWithCause(
+      `Unable to update repository setting ${keyValues.map(([key]) => `'${key}'`).join(', ')} to '${repoIdentifier}'.`,
+      error,
+    )
+  }
+}
+
+export async function updateRepositoryWorkflowPermissions(
+  repoIdentifier: RepositoryIdentifier,
+  keyValues: [string, string | number | boolean][],
+) {
+  try {
+    await runCommand([
+      'api',
+      '--method',
+      'PUT',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/actions/permissions/workflow`,
+      ...keyValues.flatMap(([key, value]) => ['-F', `${key}=${value}`]),
+      '--silent',
+    ])
+  } catch (error) {
+    throw errorWithCause(
+      `Unable to update workflow permissions ${keyValues.map(([key]) => `'${key}'`).join(', ')} to '${repoIdentifier}'.`,
+      error,
+    )
   }
 }
 
