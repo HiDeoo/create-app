@@ -8,7 +8,8 @@ import {
   addRepositorySecret,
   isGitHubRepository,
   type RepositoryIdentifier,
-  updateRepositorySetting,
+  updateRepositorySettings,
+  updateRepositoryWorkflowPermissions,
 } from './libs/github'
 import { mergePkgs, parsePkg, setPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { installDependencies, runPackageManagerCommand } from './libs/pm'
@@ -52,7 +53,7 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
 
   await prettify(appPath, options.isNew)
 
-  await updateGitHubRepositorySettings(appName)
+  await updateGitHubRepositorySettings(appName, options.access)
   await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
 
   await stageBootstrapFiles(appPath, options.access)
@@ -196,7 +197,7 @@ async function prettify(appPath: string, isNew: boolean) {
   return runPackageManagerCommand(appPath, ['prettier', '-w', '--log-level', 'silent', '.'])
 }
 
-async function updateGitHubRepositorySettings(appName: string) {
+async function updateGitHubRepositorySettings(appName: string, access: AppOptions['access']) {
   const repoIdentifier = `${USER_NAME}/${appName}` satisfies RepositoryIdentifier
 
   const shouldUpdateSettings = await isGitHubRepository(repoIdentifier)
@@ -207,7 +208,18 @@ async function updateGitHubRepositorySettings(appName: string) {
 
   logStepWithProgress('Updating GitHub repository settings…')
 
-  await updateRepositorySetting(repoIdentifier, 'delete_branch_on_merge', true)
+  await updateRepositorySettings(repoIdentifier, [
+    ['delete_branch_on_merge', true],
+    ['allow_update_branch', true],
+  ])
+
+  if (access === 'public') {
+    await updateRepositorySettings(repoIdentifier, [
+      ['allow_merge_commit', false],
+      ['allow_rebase_merge', false],
+    ])
+    await updateRepositoryWorkflowPermissions(repoIdentifier, [['can_approve_pull_request_reviews', true]])
+  }
 }
 
 async function addGitHubRepositorySecrets(
