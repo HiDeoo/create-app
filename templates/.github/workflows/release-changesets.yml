@@ -1,5 +1,7 @@
 name: release
 
+permissions: {}
+
 on:
   push:
     branches:
@@ -16,24 +18,25 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@[[HASH_ACTIONS_CHECKOUT]]
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@[[HASH_PNPM_ACTIONSETUP]]
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@[[HASH_ACTIONS_SETUPNODE]]
         with:
-          cache: pnpm
-          node-version: [[NODE_VERSION]]
+          node-version: 24
+          package-manager-cache: false
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
+        uses: changesets/action@[[HASH_CHANGESETS_ACTION]]
         with:
           version: pnpm run version
           publish: pnpm changeset publish
@@ -41,4 +44,4 @@ jobs:
           title: 'ci: release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: '' # https://github.com/changesets/changesets/issues/1152#issuecomment-3190884868

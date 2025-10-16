@@ -1,17 +1,8 @@
-import { green, reset, yellow } from 'kolorist'
+import { green, yellow } from 'kolorist'
 
 import { type AppOptions, createApp, updateApp } from './app'
-import { openNewNpmTokenPage } from './libs/npm'
 import { cwdContainsPkg } from './libs/pkg'
-import {
-  logError,
-  logMessage,
-  logStep,
-  promptForDirectory,
-  promptForName,
-  promptForToken,
-  promptForYesNo,
-} from './libs/prompt'
+import { logError, logMessage, logStep, promptForDirectory, promptForName, promptForYesNo } from './libs/prompt'
 
 async function run() {
   const options: AppOptions = { access: 'private', isNew: false }
@@ -33,21 +24,7 @@ async function run() {
     path = await promptForDirectory(name)
   }
 
-  options.access = (await promptForYesNo(
-    `Public npm package? ${reset('(if public, a page to create an npm automation access token will be opened)')}`,
-  ))
-    ? 'public'
-    : 'private'
-
-  if (options.access === 'public') {
-    openNewNpmTokenPage()
-
-    const npmToken = await promptForToken(`Npm automation access token: ${reset('(Enter nothing to skip)')}`)
-
-    if (npmToken.length > 0) {
-      options.npmToken = npmToken
-    }
-  }
+  options.access = (await promptForYesNo('Public npm package?')) ? 'public' : 'private'
 
   const builder = pkgName ? updateApp : createApp
   await builder(name, path, options)
@@ -55,7 +32,10 @@ async function run() {
   logStep(green('Done!'))
 
   if (options.access === 'public') {
-    logMessage(`\n${yellow('Do not forget to give repository access to the changeset-bot.')}`)
+    logMessage(`\nNext steps:`)
+    logMessage(
+      `\n${yellow('- Give repository access to the changeset-bot.\n- Publish a version `0.0.0` of the package and setup trusted publishing.')}`,
+    )
   }
 }
 

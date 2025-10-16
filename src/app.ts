@@ -5,9 +5,9 @@ import { USER_NAME } from './config'
 import { deleteUnsupportedEslintConfigs } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
-  addRepositorySecret,
   isGitHubRepository,
   type RepositoryIdentifier,
+  updateRepositoryActionPermissions,
   updateRepositorySettings,
   updateRepositoryWorkflowPermissions,
 } from './libs/github'
@@ -45,7 +45,6 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
   await copyEslintConfig(appPath)
-  await copyAutofixWorkflow(appPath)
   await copyReleaseWorkflow(appPath, options.access)
   await copyChangesetsDirectory(appPath, options.access)
 
@@ -54,7 +53,6 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await prettify(appPath, options.isNew)
 
   await updateGitHubRepositorySettings(appName, options.access)
-  await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
 
   await stageBootstrapFiles(appPath, options.access)
 }
@@ -139,16 +137,6 @@ async function copyEslintConfig(appPath: string) {
   return writeAppFile(appPath, fileName, template)
 }
 
-async function copyAutofixWorkflow(appPath: string) {
-  logStepWithProgress('Setting up autofix…')
-
-  const filePath = '.github/workflows/autofix.yml'
-  const template = await getTemplateContent(getTemplatePath(filePath))
-  const compiledTemplate = compileTemplate(template)
-
-  return writeAppFile(appPath, filePath, compiledTemplate)
-}
-
 async function copyReleaseWorkflow(appPath: string, access: AppOptions['access']) {
   logStepWithProgress('Setting up release workflow…')
 
@@ -219,21 +207,12 @@ async function updateGitHubRepositorySettings(appName: string, access: AppOption
       ['allow_rebase_merge', false],
     ])
     await updateRepositoryWorkflowPermissions(repoIdentifier, [['can_approve_pull_request_reviews', true]])
+    await updateRepositoryActionPermissions(repoIdentifier, [
+      ['enabled', true],
+      ['allowed_actions', 'all'],
+      ['sha_pinning_required', true],
+    ])
   }
-}
-
-async function addGitHubRepositorySecrets(
-  appName: string,
-  access: AppOptions['access'],
-  npmToken: AppOptions['npmToken'],
-) {
-  if (access !== 'public' || !npmToken || npmToken.length === 0) {
-    return
-  }
-
-  logStepWithProgress('Adding GitHub repository secrets…')
-
-  await addRepositorySecret(`${USER_NAME}/${appName}`, 'NPM_TOKEN', npmToken)
 }
 
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
@@ -291,5 +270,4 @@ async function stageBootstrapFiles(appPath: string, access: AppOptions['access']
 export interface AppOptions {
   access: 'private' | 'public'
   isNew: boolean
-  npmToken?: string
 }

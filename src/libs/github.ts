@@ -58,26 +58,64 @@ export async function updateRepositoryWorkflowPermissions(
   }
 }
 
-export async function addRepositorySecret(repoIdentifier: RepositoryIdentifier, key: string, value: string) {
+export async function updateRepositoryActionPermissions(
+  repoIdentifier: RepositoryIdentifier,
+  keyValues: [string, string | number | boolean][],
+) {
   try {
-    await runCommand(['secret', 'set', key, '-R', repoIdentifier, '-b', value])
+    await runCommand([
+      'api',
+      '--method',
+      'PUT',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/actions/permissions`,
+      ...keyValues.flatMap(([key, value]) => ['-F', `${key}=${value}`]),
+      '--silent',
+    ])
   } catch (error) {
-    throw errorWithCause(`Unable to add repository secret '${key}' to '${repoIdentifier}'.`, error)
+    throw errorWithCause(
+      `Unable to update action permissions ${keyValues.map(([key]) => `'${key}'`).join(', ')} to '${repoIdentifier}'.`,
+      error,
+    )
   }
 }
 
-export async function getRepositoryLastCommitHash(repoIdentifier: RepositoryIdentifier) {
+export async function getActionLatestReleaseHash(repoIdentifier: RepositoryIdentifier) {
   try {
-    const stdout = await runCommand([
+    let stdout = await runCommand([
       'api',
       '-H',
       'Accept: application/vnd.github+json',
-      `/repos/${repoIdentifier}/commits/main`,
+      `/repos/${repoIdentifier}/releases/latest`,
     ])
 
-    return (JSON.parse(stdout) as { sha: string }).sha
+    const release = JSON.parse(stdout) as { tag_name: string }
+
+    stdout = await runCommand([
+      'api',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/git/refs/tags/${release.tag_name.replace(/^refs\/tags\//u, '')}`,
+    ])
+
+    const ref = JSON.parse(stdout) as { object: { sha: string; type: 'commit' | 'tag' } }
+
+    if (ref.object.type === 'tag') {
+      stdout = await runCommand([
+        'api',
+        '-H',
+        'Accept: application/vnd.github+json',
+        `/repos/${repoIdentifier}/git/tags/${ref.object.sha}`,
+      ])
+
+      const tag = JSON.parse(stdout) as { object: { sha: string } }
+      ref.object.sha = tag.object.sha
+    }
+
+    return `${ref.object.sha} # ${release.tag_name}`
   } catch (error) {
-    throw errorWithCause(`Unable to get the last commit hash of '${repoIdentifier}'.`, error)
+    throw errorWithCause(`Unable to get the last release hash of '${repoIdentifier}'.`, error)
   }
 }
 

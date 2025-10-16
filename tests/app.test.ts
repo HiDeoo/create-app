@@ -24,6 +24,14 @@ import { parseTsConfig, PRESERVED_TS_COMPILER_OPTIONS } from '../src/libs/typesc
 
 import { getExpectedPaths, getTestDirPaths, getTestContent, setupTest } from './utils'
 
+const actions = [
+  'actions/checkout',
+  'actions/setup-node',
+  'autofix-ci/action',
+  'changesets/action',
+  'pnpm/action-setup',
+]
+
 vi.mock('undici', async () => {
   const mod = await vi.importActual<typeof import('undici')>('undici')
 
@@ -42,7 +50,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'new-public-app',
     description: 'should create a new public app',
-    options: { access: 'public', isNew: true, npmToken: 'token' },
+    options: { access: 'public', isNew: true },
     setup: (testDir, appName, options) => createApp(appName, testDir, options),
   },
   {
@@ -54,7 +62,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'vite-react-ts',
     description: 'should update a public Vite app with React & TypeScript',
-    options: { access: 'public', isNew: false, npmToken: 'token' },
+    options: { access: 'public', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
@@ -66,7 +74,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'vite-react-ts-swc',
     description: 'should update a public Vite app with React & TypeScript & SWC',
-    options: { access: 'public', isNew: false, npmToken: 'token' },
+    options: { access: 'public', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
@@ -78,7 +86,7 @@ const testScenarios: TestScenario[] = [
   {
     appName: 'vite-preact-ts',
     description: 'should update a public Vite app with Preact & TypeScript',
-    options: { access: 'public', isNew: false, npmToken: 'token' },
+    options: { access: 'public', isNew: false },
     setup: (testDir, appName, options) => updateApp(appName, testDir, options),
   },
   {
@@ -109,7 +117,7 @@ vi.mock('node:child_process', async () => {
       stdout: {
         on: vi.fn().mockImplementation((event: string, listener: (data: string) => void) => {
           if (event === 'data') {
-            listener('{ "sha": "latest" }')
+            listener('{ "tag_name": "latest", "object": { "sha": "latest", "type": "tag" } }')
           }
         }),
       },
@@ -129,7 +137,11 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     templateVariables = {
       APP_NAME: appName,
-      AUTOFIX_HASH: 'latest',
+      HASH_ACTIONS_CHECKOUT: 'latest # latest',
+      HASH_ACTIONS_SETUPNODE: 'latest # latest',
+      HASH_AUTOFIXCI_ACTION: 'latest # latest',
+      HASH_CHANGESETS_ACTION: 'latest # latest',
+      HASH_PNPM_ACTIONSETUP: 'latest # latest',
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
       NODE_VERSION,
@@ -321,10 +333,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     test('should run only necessary commands', () => {
       expect(spawnMock).toHaveBeenCalledTimes(
-        7 +
-          (options.isNew ? 0 : 1) +
-          (options.npmToken && options.npmToken.length > 0 ? 1 : 0) +
-          (options.access === 'public' ? 2 : 0),
+        6 + actions.length * 3 + (options.isNew ? 0 : 1) + (options.access === 'public' ? 3 : 0),
       )
     })
 
@@ -332,14 +341,30 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       expectSpawnToHaveBeenNthCalledWith('git', ['rev-parse', '--is-inside-work-tree'])
     })
 
-    test('should fetch the autofix latest commit hash', () => {
-      expectSpawnToHaveBeenNthCalledWith('gh', [
-        'api',
-        '-H',
-        'Accept: application/vnd.github+json',
-        `/repos/autofix-ci/action/commits/main`,
-      ])
-    })
+    for (const action of actions) {
+      test(`should fetch the ${action} latest release hash`, () => {
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${action}/releases/latest`,
+        ])
+
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${action}/git/refs/tags/latest`,
+        ])
+
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${action}/git/tags/latest`,
+        ])
+      })
+    }
 
     test('should install dependencies', () => {
       expectSpawnToHaveBeenNthCalledWith(getPackageManagerBinary(), ['install'])
@@ -412,19 +437,21 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
           'can_approve_pull_request_reviews=true',
           '--silent',
         ])
-      }
-    })
 
-    test('should setup the npm automation access token if needed', () => {
-      if (options.npmToken && options.npmToken.length > 0) {
         expectSpawnToHaveBeenNthCalledWith('gh', [
-          'secret',
-          'set',
-          'NPM_TOKEN',
-          '-R',
-          `${USER_NAME}/${appName}`,
-          '-b',
-          options.npmToken,
+          'api',
+          '--method',
+          'PUT',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${USER_NAME}/${appName}/actions/permissions`,
+          '-F',
+          'enabled=true',
+          '-F',
+          'allowed_actions=all',
+          '-F',
+          'sha_pinning_required=true',
+          '--silent',
         ])
       }
     })

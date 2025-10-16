@@ -6,7 +6,7 @@ import glob from 'tiny-glob'
 
 import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '../config'
 
-import { getRepositoryLastCommitHash } from './github'
+import { getActionLatestReleaseHash } from './github'
 import { getPkgManagerLatestVersion } from './pm'
 
 // A set of templates which will not be automatically processed and requires special handling.
@@ -14,7 +14,6 @@ const specialTemplates = new Set([
   'package.json',
   'tsconfig.json',
   'eslint.config.mjs',
-  '.github/workflows/autofix.yml',
   '.github/workflows/release-changesets.yml',
   '.github/workflows/release-custom.yml',
   '.changeset/config.json',
@@ -23,7 +22,11 @@ const specialTemplates = new Set([
 
 const templateVariableKeys = [
   'APP_NAME',
-  'AUTOFIX_HASH',
+  'HASH_ACTIONS_CHECKOUT',
+  'HASH_ACTIONS_SETUPNODE',
+  'HASH_AUTOFIXCI_ACTION',
+  'HASH_CHANGESETS_ACTION',
+  'HASH_PNPM_ACTIONSETUP',
   'PACKAGE_MANAGER',
   'PACKAGE_MANAGER_VERSION',
   'NODE_VERSION',
@@ -77,15 +80,13 @@ export async function setTemplateVariables(variables: UserDefinedTemplateVariabl
     throw new Error('Unable to get latest package manager version.')
   }
 
-  const autofixHash = await getRepositoryLastCommitHash('autofix-ci/action')
-
-  if (!autofixHash) {
-    throw new Error('Unable to get autofix hash.')
-  }
-
   templateVariables = {
     APP_NAME: variables.APP_NAME,
-    AUTOFIX_HASH: autofixHash,
+    HASH_ACTIONS_CHECKOUT: await getActionLatestReleaseHash('actions/checkout'),
+    HASH_ACTIONS_SETUPNODE: await getActionLatestReleaseHash('actions/setup-node'),
+    HASH_AUTOFIXCI_ACTION: await getActionLatestReleaseHash('autofix-ci/action'),
+    HASH_CHANGESETS_ACTION: await getActionLatestReleaseHash('changesets/action'),
+    HASH_PNPM_ACTIONSETUP: await getActionLatestReleaseHash('pnpm/action-setup'),
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
     NODE_VERSION,
