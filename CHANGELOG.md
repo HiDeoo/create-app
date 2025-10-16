@@ -1,5 +1,20 @@
 # @hideoo/create-app
 
+## 4.4.0
+
+### Minor Changes
+
+- [#55](https://github.com/HiDeoo/create-app/pull/55) [`90b66b3`](https://github.com/HiDeoo/create-app/commit/90b66b3840514b3212d51cc70bd96947ea3e6fd4) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Uses trusted publishing with OpenID Connect (OIDC) authentication.
+
+- [#55](https://github.com/HiDeoo/create-app/pull/55) [`90b66b3`](https://github.com/HiDeoo/create-app/commit/90b66b3840514b3212d51cc70bd96947ea3e6fd4) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Updates more GitHub settings if a repository matching the name of the app exists on GitHub:
+
+  - For public npm packages:
+    - Enable setting to [require GitHub Actions to be pinned to a full-length commit SHA](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#managing-github-actions-permissions-for-your-repository)
+
+### Patch Changes
+
+- [#55](https://github.com/HiDeoo/create-app/pull/55) [`90b66b3`](https://github.com/HiDeoo/create-app/commit/90b66b3840514b3212d51cc70bd96947ea3e6fd4) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Setups trusted publishing using OpenID Connect (OIDC) authentication — no code changes.
+
 ## 4.3.0
 
 ### Minor Changes
