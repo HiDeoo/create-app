@@ -23,8 +23,7 @@
   "prettier": "@hideoo/prettier-config",
   "private": true,
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "repository": {
     "url": "https://github.com/[[USER_NAME]]/[[APP_NAME]].git",

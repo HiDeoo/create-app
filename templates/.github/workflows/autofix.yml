@@ -1,5 +1,7 @@
 name: autofix.ci
 
+permissions: {}
+
 on:
   push:
     branches:
@@ -9,9 +11,6 @@ on:
       - main
   workflow_call:
 
-permissions:
-  contents: read
-
 concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.head_ref || github.ref }}
@@ -20,15 +19,19 @@ jobs:
   autofix:
     name: Format code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@[[HASH_ACTIONS_CHECKOUT]]
+        with:
+          persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@[[HASH_PNPM_ACTIONSETUP]]
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@[[HASH_ACTIONS_SETUPNODE]]
         with:
           cache: pnpm
           node-version: [[NODE_VERSION]]
@@ -40,6 +43,6 @@ jobs:
         run: pnpm format
 
       - name: Run autofix
-        uses: autofix-ci/action@[[AUTOFIX_HASH]]
+        uses: autofix-ci/action@[[HASH_AUTOFIXCI_ACTION]]
         with:
           fail-fast: false

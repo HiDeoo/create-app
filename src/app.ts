@@ -5,7 +5,6 @@ import { USER_NAME } from './config'
 import { deleteUnsupportedEslintConfigs } from './libs/eslint'
 import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
-  addRepositorySecret,
   isGitHubRepository,
   type RepositoryIdentifier,
   updateRepositorySettings,
@@ -45,7 +44,6 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await copyPkg(appPath, options.access)
   await copyTsConfig(appPath)
   await copyEslintConfig(appPath)
-  await copyAutofixWorkflow(appPath)
   await copyReleaseWorkflow(appPath, options.access)
   await copyChangesetsDirectory(appPath, options.access)
 
@@ -54,7 +52,6 @@ async function bootstrapApp(appName: string, appPath: string, options: AppOption
   await prettify(appPath, options.isNew)
 
   await updateGitHubRepositorySettings(appName, options.access)
-  await addGitHubRepositorySecrets(appName, options.access, options.npmToken)
 
   await stageBootstrapFiles(appPath, options.access)
 }
@@ -139,16 +136,6 @@ async function copyEslintConfig(appPath: string) {
   return writeAppFile(appPath, fileName, template)
 }
 
-async function copyAutofixWorkflow(appPath: string) {
-  logStepWithProgress('Setting up autofix…')
-
-  const filePath = '.github/workflows/autofix.yml'
-  const template = await getTemplateContent(getTemplatePath(filePath))
-  const compiledTemplate = compileTemplate(template)
-
-  return writeAppFile(appPath, filePath, compiledTemplate)
-}
-
 async function copyReleaseWorkflow(appPath: string, access: AppOptions['access']) {
   logStepWithProgress('Setting up release workflow…')
 
@@ -222,20 +209,6 @@ async function updateGitHubRepositorySettings(appName: string, access: AppOption
   }
 }
 
-async function addGitHubRepositorySecrets(
-  appName: string,
-  access: AppOptions['access'],
-  npmToken: AppOptions['npmToken'],
-) {
-  if (access !== 'public' || !npmToken || npmToken.length === 0) {
-    return
-  }
-
-  logStepWithProgress('Adding GitHub repository secrets…')
-
-  await addRepositorySecret(`${USER_NAME}/${appName}`, 'NPM_TOKEN', npmToken)
-}
-
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
   try {
     return await fs.readFile(path.join(appPath, filePath), { encoding: 'utf8' })
@@ -291,5 +264,4 @@ async function stageBootstrapFiles(appPath: string, access: AppOptions['access']
 export interface AppOptions {
   access: 'private' | 'public'
   isNew: boolean
-  npmToken?: string
 }

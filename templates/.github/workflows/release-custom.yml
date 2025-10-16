@@ -1,5 +1,7 @@
 name: release
 
+permissions: {}
+
 on:
   push:
     tags:
@@ -19,15 +21,16 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@[[HASH_ACTIONS_CHECKOUT]]
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@[[HASH_PNPM_ACTIONSETUP]]
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@[[HASH_ACTIONS_SETUPNODE]]
         with:
           cache: pnpm
           node-version: [[NODE_VERSION]]
@@ -36,6 +39,6 @@ jobs:
         run: pnpm install
 
       - name: Generate changelog
-        uses: hideoo/changelogithub-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

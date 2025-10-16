@@ -20,7 +20,6 @@
     "comment-json": "^4.2.5",
     "kolorist": "^1.8.0",
     "lodash.merge": "^4.6.2",
-    "open": "^10.1.0",
     "ora": "^8.1.1",
     "prompts": "^2.4.2",
     "sort-object-keys": "^1.1.3",
@@ -56,8 +55,7 @@
     "templates/.gitignore"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "sideEffects": false,
   "engines": {
