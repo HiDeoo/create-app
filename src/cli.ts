@@ -32,7 +32,10 @@ async function run() {
   logStep(green('Done!'))
 
   if (options.access === 'public') {
-    logMessage(`\n${yellow('Do not forget to give repository access to the changeset-bot.')}`)
+    logMessage(`\nNext steps:`)
+    logMessage(
+      `\n${yellow('- Give repository access to the changeset-bot.\n- Publish a version `0.0.0` of the package and setup trusted publishing.')}`,
+    )
   }
 }
 
