@@ -7,6 +7,7 @@ import { initGitRepository, isGitRepository, stageFiles } from './libs/git'
 import {
   isGitHubRepository,
   type RepositoryIdentifier,
+  updateRepositoryActionPermissions,
   updateRepositorySettings,
   updateRepositoryWorkflowPermissions,
 } from './libs/github'
@@ -206,6 +207,11 @@ async function updateGitHubRepositorySettings(appName: string, access: AppOption
       ['allow_rebase_merge', false],
     ])
     await updateRepositoryWorkflowPermissions(repoIdentifier, [['can_approve_pull_request_reviews', true]])
+    await updateRepositoryActionPermissions(repoIdentifier, [
+      ['enabled', true],
+      ['allowed_actions', 'all'],
+      ['sha_pinning_required', true],
+    ])
   }
 }
 

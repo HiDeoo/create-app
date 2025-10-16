@@ -333,7 +333,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
 
     test('should run only necessary commands', () => {
       expect(spawnMock).toHaveBeenCalledTimes(
-        6 + actions.length * 3 + (options.isNew ? 0 : 1) + (options.access === 'public' ? 2 : 0),
+        6 + actions.length * 3 + (options.isNew ? 0 : 1) + (options.access === 'public' ? 3 : 0),
       )
     })
 
@@ -435,6 +435,22 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
           `/repos/${USER_NAME}/${appName}/actions/permissions/workflow`,
           '-F',
           'can_approve_pull_request_reviews=true',
+          '--silent',
+        ])
+
+        expectSpawnToHaveBeenNthCalledWith('gh', [
+          'api',
+          '--method',
+          'PUT',
+          '-H',
+          'Accept: application/vnd.github+json',
+          `/repos/${USER_NAME}/${appName}/actions/permissions`,
+          '-F',
+          'enabled=true',
+          '-F',
+          'allowed_actions=all',
+          '-F',
+          'sha_pinning_required=true',
           '--silent',
         ])
       }

@@ -58,6 +58,29 @@ export async function updateRepositoryWorkflowPermissions(
   }
 }
 
+export async function updateRepositoryActionPermissions(
+  repoIdentifier: RepositoryIdentifier,
+  keyValues: [string, string | number | boolean][],
+) {
+  try {
+    await runCommand([
+      'api',
+      '--method',
+      'PUT',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/actions/permissions`,
+      ...keyValues.flatMap(([key, value]) => ['-F', `${key}=${value}`]),
+      '--silent',
+    ])
+  } catch (error) {
+    throw errorWithCause(
+      `Unable to update action permissions ${keyValues.map(([key]) => `'${key}'`).join(', ')} to '${repoIdentifier}'.`,
+      error,
+    )
+  }
+}
+
 export async function getActionLatestReleaseHash(repoIdentifier: RepositoryIdentifier) {
   try {
     let stdout = await runCommand([
