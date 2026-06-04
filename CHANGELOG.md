@@ -1,5 +1,15 @@
 # @hideoo/create-app
 
+## 4.5.0
+
+### Minor Changes
+
+- [#58](https://github.com/HiDeoo/create-app/pull/58) [`de2130f`](https://github.com/HiDeoo/create-app/commit/de2130f36223d7ad4a30e4a1da84cfdbc7ff57a1) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Adds support for pnpm v11.
+
+- [#58](https://github.com/HiDeoo/create-app/pull/58) [`de2130f`](https://github.com/HiDeoo/create-app/commit/de2130f36223d7ad4a30e4a1da84cfdbc7ff57a1) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Adds a [`minimumReleaseAge`](https://pnpm.io/settings#minimumreleaseage) pnpm setting of 3 days to generated projects.
+
+- [#58](https://github.com/HiDeoo/create-app/pull/58) [`de2130f`](https://github.com/HiDeoo/create-app/commit/de2130f36223d7ad4a30e4a1da84cfdbc7ff57a1) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Bumps default Node.js version to 22.
+
 ## 4.4.0
 
 ### Minor Changes
