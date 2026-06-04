@@ -56,7 +56,7 @@ Either **create** a new app from scratch (in the current directory or a new dire
 ### Dependencies
 
 - Automatically install all dependencies using `pnpm`
-- Use the latest version for all new and existing dependencies (versions are fetched from [jsDelivr](https://www.jsdelivr.com))
+- Use the latest version matching a 3-day pnpm [`minimumReleaseAge`](https://pnpm.io/settings#minimumreleaseage) setting for all new and existing dependencies
 
 ### Miscellaneous
 

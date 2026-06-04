@@ -1,0 +1,5 @@
+allowBuilds:
+  unrs-resolver: false
+
+# Prevent installing packages published in the last 3 days.
+minimumReleaseAge: [[PACKAGE_MANAGER_MINIMUM_RELEASE_AGE]]

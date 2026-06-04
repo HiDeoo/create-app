@@ -2,10 +2,11 @@ export const USER_NAME = 'HiDeoo'
 export const USER_MAIL = 'github@hideoo.dev'
 export const USER_SITE = 'https://hideoo.dev'
 
-export const NODE_VERSION = 18
+export const NODE_VERSION = 22
 
 export const PACKAGE_MANAGER = 'pnpm'
 export const PACKAGE_MANAGER_EXECUTE = 'pnpx'
+export const PACKAGE_MANAGER_MINIMUM_RELEASE_AGE = 4320 // In minutes, equals to 3 days.
 
 export const PKG_INVALID_DEPENDENCIES = [
   '@typescript-eslint/eslint-plugin',

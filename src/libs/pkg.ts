@@ -8,7 +8,7 @@ import validateNpmPackageName from 'validate-npm-package-name'
 import type { AppOptions } from '../app'
 import { NODE_VERSION, PKG_INVALID_DEPENDENCIES, PKG_KEYS_ORDER } from '../config'
 
-import { getPkgLatestVersion } from './jsdelivr'
+import { getPkgLatestVersionMatchingMinimumReleaseAge } from './npm'
 
 export function isValidPkgName(name: string) {
   return validateNpmPackageName(name).validForNewPackages
@@ -95,7 +95,7 @@ export async function setPkgDependenciesToLatest(pkg: PackageJson, onPin: (name:
 
       onPin(pkgName)
 
-      const version = await getPkgLatestVersion(pkgName)
+      const version = await getPkgLatestVersionMatchingMinimumReleaseAge(pkgName)
 
       if (version) {
         pkg.devDependencies['@types/node'] = version
@@ -134,7 +134,7 @@ async function setDependenciesToLatest(dependencies: PackageJson.Dependency, onP
   for (const name of Object.keys(dependencies)) {
     onPin(name)
 
-    const version = await getPkgLatestVersion(name)
+    const version = await getPkgLatestVersionMatchingMinimumReleaseAge(name)
 
     if (version) {
       deps[name] = applyVersionPrefix(version)

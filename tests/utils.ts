@@ -3,6 +3,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
+import { defaultOptions } from 'fast-npm-meta'
 import glob from 'tiny-glob'
 import { MockAgent, setGlobalDispatcher } from 'undici'
 import { vi } from 'vitest'
@@ -29,9 +30,9 @@ export function setupTest(testName: string) {
     setGlobalDispatcher(mockAgent)
     mockAgent.disableNetConnect()
 
-    const mockPool = mockAgent.get(JSDELIVR_URL)
+    const jsdelivrMockPool = mockAgent.get(JSDELIVR_URL)
 
-    mockPool
+    jsdelivrMockPool
       .intercept({ path: () => true })
       .reply(200, (opts) => {
         if (opts.path === '/npm/@hideoo/tsconfig/tsconfig.json') {
@@ -45,6 +46,33 @@ export function setupTest(testName: string) {
         }
 
         return { version: 'la.te.st' }
+      })
+      .persist()
+
+    const npmMetaMockPool = mockAgent.get(new URL(defaultOptions.apiEndpoint).origin)
+
+    npmMetaMockPool
+      .intercept({ path: () => true })
+      .reply((opts) => {
+        const requestPath = opts.path
+
+        if (requestPath.startsWith('/versions/@types/node@22')) {
+          return {
+            statusCode: 200,
+            data: getTestVersionsMetadata('@types/node', '22', '22.0.1', {
+              '22.0.0': '2020-01-28T12:00:00.000Z',
+              '22.0.1': '2020-01-31T12:00:00.000Z',
+            }),
+          }
+        }
+
+        return {
+          statusCode: 200,
+          data: getTestVersionsMetadata('mock-package', '*', '1.0.1', {
+            '1.0.0': '2020-01-28T12:00:00.000Z',
+            '1.0.1': '2020-01-31T12:00:00.000Z',
+          }),
+        }
       })
       .persist()
 
@@ -112,4 +140,19 @@ export async function getTestContent(
   }
 
   return { file, fixture, template }
+}
+
+function getTestVersionsMetadata(name: string, specifier: string, latest: string, time: Record<string, string>) {
+  return {
+    name,
+    distTags: { latest },
+    lastSynced: Date.now(),
+    specifier,
+    time: {
+      created: '2020-01-01T00:00:00.000Z',
+      modified: '2020-01-31T12:00:00.000Z',
+      ...time,
+    },
+    versions: Object.keys(time),
+  }
 }

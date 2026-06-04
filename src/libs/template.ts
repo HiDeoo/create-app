@@ -4,7 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 import glob from 'tiny-glob'
 
-import { NODE_VERSION, PACKAGE_MANAGER, USER_MAIL, USER_NAME, USER_SITE } from '../config'
+import {
+  NODE_VERSION,
+  PACKAGE_MANAGER,
+  PACKAGE_MANAGER_MINIMUM_RELEASE_AGE,
+  USER_MAIL,
+  USER_NAME,
+  USER_SITE,
+} from '../config'
 
 import { getActionLatestReleaseHash } from './github'
 import { getPkgManagerLatestVersion } from './pm'
@@ -29,6 +36,7 @@ const templateVariableKeys = [
   'HASH_PNPM_ACTIONSETUP',
   'PACKAGE_MANAGER',
   'PACKAGE_MANAGER_VERSION',
+  'PACKAGE_MANAGER_MINIMUM_RELEASE_AGE',
   'NODE_VERSION',
   'USER_MAIL',
   'USER_NAME',
@@ -89,6 +97,7 @@ export async function setTemplateVariables(variables: UserDefinedTemplateVariabl
     HASH_PNPM_ACTIONSETUP: await getActionLatestReleaseHash('pnpm/action-setup'),
     PACKAGE_MANAGER,
     PACKAGE_MANAGER_VERSION: latestPmVersion,
+    PACKAGE_MANAGER_MINIMUM_RELEASE_AGE,
     NODE_VERSION,
     USER_NAME,
     USER_NAME_LC: USER_NAME.toLowerCase(),

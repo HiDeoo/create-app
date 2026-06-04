@@ -9,6 +9,7 @@ import { type AppOptions, createApp, updateApp } from '../src/app'
 import {
   NODE_VERSION,
   PACKAGE_MANAGER,
+  PACKAGE_MANAGER_MINIMUM_RELEASE_AGE,
   PKG_INVALID_DEPENDENCIES,
   PKG_KEYS_ORDER,
   USER_MAIL,
@@ -144,6 +145,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
       HASH_PNPM_ACTIONSETUP: 'latest # latest',
       PACKAGE_MANAGER,
       PACKAGE_MANAGER_VERSION: 'la.te.st',
+      PACKAGE_MANAGER_MINIMUM_RELEASE_AGE,
       NODE_VERSION,
       USER_NAME,
       USER_NAME_LC: USER_NAME.toLowerCase(),
@@ -192,7 +194,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expectDependenciesToLatest(filePkg.dependencies)
     expectPersistedDependencies(fixturePkg.dependencies, filePkg.dependencies, ['typescript'])
 
-    expectDependenciesToLatest(filePkg.devDependencies)
+    expectDependenciesToLatest(filePkg.devDependencies, { dev: true })
     expectPersistedDependencies(fixturePkg.devDependencies, filePkg.devDependencies)
 
     assert(templatePkg.engines?.['node'] && filePkg.engines?.['node'])
@@ -474,6 +476,7 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
           'eslint.config.mjs',
           'package.json',
           'pnpm-lock.yaml',
+          'pnpm-workspace.yaml',
           'tsconfig.json',
         ].map((filePath) => path.normalize(filePath)),
       )
@@ -587,6 +590,12 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
     expect(file).toBe(template)
   })
 
+  test('should add the pnpm workspace file', async () => {
+    const { file, template } = await getTestContent(testDir, appName, 'pnpm-workspace.yaml')
+
+    expectCompiledTemplate(template, file, templateVariables)
+  })
+
   test('should add the autofix workflow', async () => {
     const { file, template } = await getTestContent(testDir, appName, '.github/workflows/autofix.yml')
 
@@ -609,13 +618,13 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
   })
 })
 
-function expectDependenciesToLatest(deps?: PackageJson.Dependency) {
+function expectDependenciesToLatest(deps?: PackageJson.Dependency, options?: { dev?: boolean }) {
   if (!deps) {
     return
   }
 
-  for (const version of Object.values(deps)) {
-    expect(version).toBe('^la.te.st')
+  for (const [name, version] of Object.entries(deps)) {
+    expect(version).toBe(options?.dev && name === '@types/node' ? '22.0.0' : '^1.0.0')
   }
 }
 
