@@ -119,6 +119,26 @@ export async function getActionLatestReleaseHash(repoIdentifier: RepositoryIdent
   }
 }
 
+export async function watchRepository(repoIdentifier: RepositoryIdentifier) {
+  try {
+    await runCommand([
+      'api',
+      '--method',
+      'PUT',
+      '-H',
+      'Accept: application/vnd.github+json',
+      `/repos/${repoIdentifier}/subscription`,
+      '-F',
+      'subscribed=true',
+      '-F',
+      'ignored=false',
+      '--silent',
+    ])
+  } catch (error) {
+    throw errorWithCause(`Unable to watch repository '${repoIdentifier}'.`, error)
+  }
+}
+
 function runCommand(args: string[]) {
   return new Promise<string>((resolve, reject) => {
     let stdout = ''

@@ -10,6 +10,7 @@ import {
   updateRepositoryActionPermissions,
   updateRepositorySettings,
   updateRepositoryWorkflowPermissions,
+  watchRepository,
 } from './libs/github'
 import { mergePkgs, parsePkg, setPkgDependenciesToLatest, setPkgAccess, sortPkg } from './libs/pkg'
 import { installDependencies, runPackageManagerCommand } from './libs/pm'
@@ -213,6 +214,8 @@ async function updateGitHubRepositorySettings(appName: string, access: AppOption
       ['sha_pinning_required', true],
     ])
   }
+
+  await watchRepository(repoIdentifier)
 }
 
 async function readAppFile(appPath: string, filePath: string): Promise<string | undefined> {
