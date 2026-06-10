@@ -410,6 +410,10 @@ describe.each(testScenarios)('$description', ({ appName, options, setup }) => {
         'delete_branch_on_merge=true',
         '-F',
         'allow_update_branch=true',
+        '-F',
+        'has_wiki=false',
+        '-F',
+        'has_projects=false',
         '--silent',
       ])
 

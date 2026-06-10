@@ -200,6 +200,8 @@ async function updateGitHubRepositorySettings(appName: string, access: AppOption
   await updateRepositorySettings(repoIdentifier, [
     ['delete_branch_on_merge', true],
     ['allow_update_branch', true],
+    ['has_wiki', false],
+    ['has_projects', false],
   ])
 
   if (access === 'public') {
