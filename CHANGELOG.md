@@ -1,5 +1,15 @@
 # @hideoo/create-app
 
+## 5.0.0
+
+### Major Changes
+
+- [#60](https://github.com/HiDeoo/create-app/pull/60) [`3489c67`](https://github.com/HiDeoo/create-app/commit/3489c67be20f4a46c3392ab1a332d42ec1374dda) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Updates more GitHub settings if a repository matching the name of the app exists on GitHub:
+
+  - Disable wikis
+  - Disable projects
+  - Watch the repository for all activity
+
 ## 4.5.0
 
 ### Minor Changes
